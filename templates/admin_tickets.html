@@ -346,7 +346,7 @@
                 <div style="padding:16px;display:flex;gap:8px;flex-wrap:wrap">
                     <a href="{{ url_for('admin.admin_tickets') }}"
                         class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
-                    {% for s in ['Pending','Accepted','In Progress','Completed','Rejected'] %}
+                    {% for s in ['Pending','Accepted','In Progress','Payment Pending','Completed','Rejected'] %}
                     <a href="{{ url_for('admin.admin_tickets', status=s) }}"
                         class="filter-tab {% if status_filter==s %}active{% endif %}">{{ s }}</a>
                     {% endfor %}
@@ -370,6 +370,7 @@
                             <tr>
                                 <th>Ticket ID</th>
                                 <th>Customer</th>
+                                <th>Contact</th>
                                 <th>Vehicle</th>
                                 <th>Problem</th>
                                 <th>Status</th>
@@ -383,8 +384,19 @@
                                 <td><strong style="color:#818CF8">{{ b.ticket_id }}</strong></td>
                                 <td style="color:#E2E8F0">{{ b.customer_name }}</td>
                                 <td>
+                                    <a href="tel:{{ b.customer_phone }}" style="display:inline-flex;align-items:center;gap:5px;padding:5px 11px;
+                                        border-radius:20px;background:rgba(37,99,235,.15);color:#60A5FA;
+                                        text-decoration:none;font-size:.78rem;font-weight:600;
+                                        border:1px solid rgba(37,99,235,.3);transition:all .2s"
+                                        onmouseover="this.style.background='rgba(37,99,235,.3)'"
+                                        onmouseout="this.style.background='rgba(37,99,235,.15)'">
+                                        <span class="material-icons-round" style="font-size:.95rem">call</span>
+                                        {{ b.customer_phone }}
+                                    </a>
+                                </td>
+                                <td>
                                     <div style="font-weight:600;color:#E2E8F0">{{ b.vehicle_name }}</div>
-                                    <div style="font-size:.78rem;color:#64748B">{{ b.vehicle_type }} • {{
+                                    <div style="font-size:.78rem;color:#64748B">{{ b.vehicle_type }} &bull; {{
                                         b.vehicle_number }}</div>
                                 </td>
                                 <td style="max-width:180px">
@@ -393,7 +405,14 @@
                                         {{ b.problem }}
                                     </div>
                                 </td>
-                                <td>{% include "_badge.html" %}</td>
+                                <td>
+                                    {% include "_badge.html" %}
+                                    {% if b.status == 'Payment Pending' and b.payment_method %}
+                                    <div style="font-size:.7rem;color:#818CF8;margin-top:4px;font-weight:600">
+                                        {{ '📱' if b.payment_method=='Online' else '💰' }} {{ b.payment_method }}
+                                    </div>
+                                    {% endif %}
+                                </td>
                                 <td style="color:#64748B;font-size:.8rem">{{ b.created_at[:10] }}</td>
                                 <td>
                                     <div style="display:flex;gap:4px;flex-wrap:wrap">
@@ -401,13 +420,17 @@
                                         {% for next_status in allowed %}
                                         <form method="POST"
                                             action="{{ url_for('admin.update_status', booking_id=b.id) }}"
-                                            style="display:inline">
+                                            style="display:inline"
+                                            onsubmit="return confirmAction('{{ next_status }}','{{ b.payment_method or '' }}')">
                                             <input type="hidden" name="new_status" value="{{ next_status }}" />
                                             <button type="submit" class="flow-btn
                           {% if next_status=='Accepted' %}flow-btn-accept
                           {% elif next_status=='In Progress' %}flow-btn-progress
                           {% elif next_status=='Completed' %}flow-btn-complete
+                          {% elif next_status=='Payment Pending' %}flow-btn-bill
                           {% elif next_status=='Rejected' %}flow-btn-reject{% endif %}">
+                                                {% if next_status=='Completed' %}✅{% elif next_status=='Rejected' %}❌{%
+                                                elif next_status=='Payment Pending' %}💳{% endif %}
                                                 {{ next_status }}
                                             </button>
                                         </form>
@@ -438,4 +461,18 @@
         </div>
     </main>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function confirmAction(status, payMethod) {
+        if (status === 'Completed') {
+            const via = payMethod ? payMethod : 'selected method';
+            return confirm('Complete this service?\n\nHas payment been received via ' + via + '?\n\nClick OK to mark as Completed.');
+        }
+        if (status === 'Rejected') {
+            return confirm('Reject this ticket?\n\nAre you sure? This cannot be undone.');
+        }
+        return true;
+    }
+</script>
 {% endblock %}

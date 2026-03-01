@@ -304,8 +304,10 @@
                 </h3>
                 <div class="info-box">
                     <span class="material-icons-round">info</span>
-                    <p>After submitting the bill, the ticket status will automatically be marked as <strong
-                            style="color:#34D399">Completed</strong>.</p>
+                    <p>After submitting the bill, the ticket status will change to <strong style="color:#818CF8">Payment
+                            Pending</strong>.
+                        The customer will be notified to select Online or Cash payment.
+                        You can then verify and mark as <strong style="color:#34D399">Completed</strong>.</p>
                 </div>
 
                 <form method="POST" action="{{ url_for('admin.add_bill', booking_id=booking.id) }}"
@@ -353,7 +355,7 @@
               font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
               display:flex;align-items:center;gap:8px">
                             <span class="material-icons-round">save</span>
-                            {% if existing_bill %}Update Bill{% else %}Submit Bill & Complete{% endif %}
+                            {% if existing_bill %}Update Bill{% else %}Submit Bill & Send to Payment{% endif %}
                         </button>
                     </div>
                 </form>

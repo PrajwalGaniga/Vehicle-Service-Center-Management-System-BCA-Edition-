@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+{% block title %}Pay Now – {{ booking.ticket_id }} – AutoFix Pro{% endblock %}
+{% block body %}
+<nav class="navbar">
+    <div class="navbar-brand"><span class="material-icons-round">car_repair</span> AutoFix Pro</div>
+    <div class="navbar-links">
+        <a href="{{ url_for('customer.dashboard') }}" class="nav-btn"><span
+                class="material-icons-round">dashboard</span><span class="label">Dashboard</span></a>
+        <a href="{{ url_for('customer.view_bookings') }}" class="nav-btn"><span
+                class="material-icons-round">receipt_long</span><span class="label">My Bookings</span></a>
+    </div>
+</nav>
+<style>
+    .pay-wrapper {
+        min-height: calc(100vh - 64px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: linear-gradient(135deg, #EFF6FF, #F5F3FF)
+    }
+
+    [data-theme="dark"] .pay-wrapper {
+        background: linear-gradient(135deg, #0A0F1E, #0F0B1E)
+    }
+
+    .pay-card {
+        background: var(--card);
+        border-radius: 20px;
+        padding: 36px;
+        max-width: 560px;
+        width: 100%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .1);
+        border: 1px solid var(--border);
+        animation: fadeUp .4s ease
+    }
+
+    .pay-title {
+        text-align: center;
+        margin-bottom: 32px
+    }
+
+    .pay-title .pay-icon {
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+        box-shadow: 0 8px 28px rgba(99, 102, 241, .35)
+    }
+
+    .pay-title .pay-icon span {
+        font-size: 2.2rem;
+        color: #fff
+    }
+
+    .pay-title h2 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--text)
+    }
+
+    .pay-title p {
+        font-size: .85rem;
+        color: var(--text-muted);
+        margin-top: 4px
+    }
+
+    .bill-summary {
+        background: var(--bg);
+        border-radius: 12px;
+        padding: 18px;
+        margin-bottom: 24px;
+        border: 1px solid var(--border)
+    }
+
+    .bill-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: .85rem;
+        color: var(--text-muted)
+    }
+
+    .bill-row:last-child {
+        border-top: 2px solid var(--border);
+        margin-top: 6px;
+        padding-top: 12px;
+        font-weight: 800;
+        font-size: 1rem;
+        color: var(--text)
+    }
+
+    .pay-methods {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 28px
+    }
+
+    .pay-method {
+        border: 2px solid var(--border);
+        border-radius: 16px;
+        padding: 22px 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: all .25s;
+        position: relative;
+        background: var(--card)
+    }
+
+    .pay-method:hover {
+        border-color: #6366F1;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 24px rgba(99, 102, 241, .15)
+    }
+
+    .pay-method input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0
+    }
+
+    .pay-method input[type="radio"]:checked+.pay-method-inner {
+        color: #4F46E5
+    }
+
+    .pay-method.selected {
+        border-color: #4F46E5;
+        background: linear-gradient(135deg, rgba(99, 102, 241, .06), rgba(124, 58, 237, .04));
+        box-shadow: 0 4px 20px rgba(99, 102, 241, .2)
+    }
+
+    .pay-method-inner {
+        pointer-events: none
+    }
+
+    .pay-method-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        display: block
+    }
+
+    .pay-method-name {
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 4px
+    }
+
+    .pay-method-sub {
+        font-size: .75rem;
+        color: var(--text-muted)
+    }
+
+    .pay-confirm-btn {
+        width: 100%;
+        padding: 14px;
+        font-size: 1rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all .25s;
+        box-shadow: 0 4px 20px rgba(99, 102, 241, .35)
+    }
+
+    .pay-confirm-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(99, 102, 241, .45)
+    }
+
+    .pay-confirm-btn:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+        transform: none
+    }
+
+    .booking-info {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 22px;
+        background: var(--bg);
+        border-radius: 12px;
+        padding: 16px;
+        border: 1px solid var(--border)
+    }
+
+    .binfo-item .binfo-label {
+        font-size: .7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        font-weight: 600
+    }
+
+    .binfo-item .binfo-val {
+        font-size: .88rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-top: 2px
+    }
+</style>
+<div class="pay-wrapper">
+    <div class="pay-card">
+        <div class="pay-title">
+            <div class="pay-icon"><span class="material-icons-round">payment</span></div>
+            <h2>Complete Payment</h2>
+            <p>Choose how you'd like to pay for your service</p>
+        </div>
+
+        <!-- Booking Info -->
+        <div class="booking-info">
+            <div class="binfo-item">
+                <div class="binfo-label">Ticket ID</div>
+                <div class="binfo-val" style="color:#4F46E5">{{ booking.ticket_id }}</div>
+            </div>
+            <div class="binfo-item">
+                <div class="binfo-label">Vehicle</div>
+                <div class="binfo-val">{{ booking.vehicle_name }}</div>
+            </div>
+            <div class="binfo-item">
+                <div class="binfo-label">Vehicle Number</div>
+                <div class="binfo-val">{{ booking.vehicle_number }}</div>
+            </div>
+            <div class="binfo-item">
+                <div class="binfo-label">Status</div>
+                <div class="binfo-val"><span class="badge badge-payment">💳 Payment Pending</span></div>
+            </div>
+        </div>
+
+        <!-- Bill Summary -->
+        {% if bill %}
+        <div class="bill-summary">
+            <div
+                style="font-size:.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
+                Bill Breakdown</div>
+            {% if bill.spare_parts > 0 %}
+            <div class="bill-row"><span>Spare Parts</span><span>₹{{ "%.2f"|format(bill.spare_parts) }}</span></div>
+            {% endif %}
+            {% if bill.labor_charge > 0 %}
+            <div class="bill-row"><span>Labor Charge</span><span>₹{{ "%.2f"|format(bill.labor_charge) }}</span></div>
+            {% endif %}
+            {% if bill.service_charge > 0 %}
+            <div class="bill-row"><span>Service Charge</span><span>₹{{ "%.2f"|format(bill.service_charge) }}</span>
+            </div>
+            {% endif %}
+            {% if bill.tax > 0 %}
+            <div class="bill-row"><span>Tax ({{ bill.tax }}%)</span>
+                <span>₹{{ "%.2f"|format((bill.spare_parts+bill.labor_charge+bill.service_charge)*bill.tax/100) }}</span>
+            </div>
+            {% endif %}
+            <div class="bill-row"><span>Total Amount Due</span><span style="color:#4F46E5">₹{{
+                    "%.2f"|format(bill.total_amount) }}</span></div>
+        </div>
+        {% endif %}
+
+        <!-- Payment Method Selection -->
+        <form method="POST" action="{{ url_for('customer.pay_now', booking_id=booking.id) }}"
+            onsubmit="return confirmPayment()">
+            <div style="font-size:.88rem;font-weight:600;color:var(--text);margin-bottom:14px">Select Payment Method
+            </div>
+            <div class="pay-methods">
+                <label class="pay-method" id="onlineLabel" onclick="selectMethod(this,'Online')">
+                    <input type="radio" name="payment_method" value="Online" id="radioOnline">
+                    <div class="pay-method-inner">
+                        <span class="pay-method-icon">📱</span>
+                        <div class="pay-method-name">Online</div>
+                        <div class="pay-method-sub">UPI · Card · Net Banking</div>
+                    </div>
+                </label>
+                <label class="pay-method" id="cashLabel" onclick="selectMethod(this,'Cash')">
+                    <input type="radio" name="payment_method" value="Cash" id="radioCash">
+                    <div class="pay-method-inner">
+                        <span class="pay-method-icon">💰</span>
+                        <div class="pay-method-name">Cash</div>
+                        <div class="pay-method-sub">Pay at service center</div>
+                    </div>
+                </label>
+            </div>
+            <button type="submit" class="pay-confirm-btn" id="payBtn" disabled>
+                <span class="material-icons-round">check_circle</span> Confirm Payment Method
+            </button>
+        </form>
+        <div style="text-align:center;margin-top:16px">
+            <a href="{{ url_for('customer.view_bookings') }}" style="font-size:.8rem;color:var(--text-muted)">← Back to
+                bookings</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    let selectedMethod = null;
+    function selectMethod(el, method) {
+        selectedMethod = method;
+        document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('selected'));
+        el.classList.add('selected');
+        document.getElementById('payBtn').disabled = false;
+        document.getElementById('payBtn').innerHTML =
+            '<span class="material-icons-round">check_circle</span> Pay via ' + method;
+    }
+    function confirmPayment() {
+        if (!selectedMethod) { alert('Please select a payment method.'); return false; }
+        return confirm('Confirm payment via ' + selectedMethod + '?\n\nNote: Admin will verify your payment and mark the service as Completed.');
+    }
+</script>
+{% endblock %}

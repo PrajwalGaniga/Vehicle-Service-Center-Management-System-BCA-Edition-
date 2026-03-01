@@ -11,10 +11,11 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
 
 
 def init_db():
-    """Automatically creates database.db and all required tables if they don't exist."""
+    """Zero-setup: Creates DB + tables on first run. Safe migrations for existing DBs."""
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
+    # ── CUSTOMERS ─────────────────────────────────────────────────────────────
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS customers (
             id       INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,7 +24,14 @@ def init_db():
             password TEXT    NOT NULL
         )
     """)
+    # Safe migration: add email if it doesn't exist
+    try:
+        cursor.execute("ALTER TABLE customers ADD COLUMN email TEXT DEFAULT ''")
+        print("[AutoFix Pro] Migration: added 'email' to customers.")
+    except Exception:
+        pass  # Column already exists
 
+    # ── BOOKINGS ──────────────────────────────────────────────────────────────
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS bookings (
             id             INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,7 +51,14 @@ def init_db():
             FOREIGN KEY (customer_id) REFERENCES customers(id)
         )
     """)
+    # Safe migration: add payment_method if it doesn't exist
+    try:
+        cursor.execute("ALTER TABLE bookings ADD COLUMN payment_method TEXT DEFAULT ''")
+        print("[AutoFix Pro] Migration: added 'payment_method' to bookings.")
+    except Exception:
+        pass
 
+    # ── BILLS ─────────────────────────────────────────────────────────────────
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS bills (
             id             INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -57,6 +72,20 @@ def init_db():
         )
     """)
 
+    # ── NOTIFICATIONS (NEW) ───────────────────────────────────────────────────
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS notifications (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            customer_id INTEGER NOT NULL,
+            message     TEXT    NOT NULL,
+            is_read     INTEGER NOT NULL DEFAULT 0,
+            created_at  TEXT    NOT NULL,
+            FOREIGN KEY (customer_id) REFERENCES customers(id)
+        )
+    """)
+
+    # Enable WAL mode for concurrent read/write without locking
+    conn.execute("PRAGMA journal_mode=WAL")
     conn.commit()
     conn.close()
     print("[AutoFix Pro] Database initialized successfully.")
