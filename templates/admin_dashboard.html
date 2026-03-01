@@ -1,21 +1,47 @@
 {% extends "base.html" %}
 {% block title %}Admin Dashboard – AutoFix Pro{% endblock %}
 {% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
-    body[data-theme="light"] {
-        --bg: #F1F5F9;
+    /* ── ROOT & RESET ─────────────────────────────────────────────────────── */
+    :root {
+        --adm-bg: #0A0F1E;
+        --adm-card: #0F172A;
+        --adm-card2: #141B2D;
+        --adm-border: #1E2D45;
+        --adm-text: #E2E8F0;
+        --adm-muted: #64748B;
+        --adm-indigo: #6366F1;
+        --adm-violet: #8B5CF6;
+        --adm-cyan: #06B6D4;
+        --adm-orange: #F97316;
+        --adm-green: #10B981;
+        --adm-yellow: #F59E0B;
+        --adm-red: #EF4444;
     }
 
-    .admin-layout {
+    body {
+        background: var(--adm-bg) !important;
+        font-family: 'Inter', sans-serif
+    }
+
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0
+    }
+
+    /* ── LAYOUT ───────────────────────────────────────────────────────────── */
+    .adm-wrap {
         display: flex;
         min-height: 100vh
     }
 
-    /* SIDEBAR */
-    .sidebar {
-        width: 240px;
-        background: #0F172A;
-        color: #94A3B8;
+    /* ── SIDEBAR ──────────────────────────────────────────────────────────── */
+    .adm-sidebar {
+        width: 248px;
+        background: var(--adm-card);
+        border-right: 1px solid var(--adm-border);
         display: flex;
         flex-direction: column;
         position: fixed;
@@ -23,232 +49,359 @@
         left: 0;
         height: 100vh;
         z-index: 200;
-        border-right: 1px solid #1E293B;
         transition: transform .3s
     }
 
-    .sidebar-logo {
-        padding: 20px;
-        border-bottom: 1px solid #1E293B;
+    .adm-slogo {
+        padding: 22px 20px;
+        border-bottom: 1px solid var(--adm-border);
         display: flex;
         align-items: center;
-        gap: 10px
+        gap: 12px
     }
 
-    .sidebar-logo span.brand {
+    .adm-slogo .logobadge {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #6366F1, #8B5CF6);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, .4)
+    }
+
+    .adm-slogo .logobadge span {
+        font-size: 1.3rem;
+        color: #fff
+    }
+
+    .adm-slogo .logoname {
         font-size: 1.1rem;
         font-weight: 800;
         color: #F1F5F9
     }
 
-    .sidebar-logo .logo-dot {
-        width: 36px;
-        height: 36px;
-        background: linear-gradient(135deg, #4F46E5, #7C3AED);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center
+    .adm-slogo .logoname small {
+        display: block;
+        font-size: .65rem;
+        color: var(--adm-muted);
+        font-weight: 400
     }
 
-    .sidebar-logo .logo-dot span {
-        font-size: 1.2rem;
-        color: #fff
-    }
-
-    .sidebar-section {
-        padding: 16px 12px 8px;
-        font-size: .7rem;
+    .adm-sgroup {
+        padding: 16px 12px 4px;
+        font-size: .65rem;
         font-weight: 700;
-        color: #475569;
+        color: #334155;
         text-transform: uppercase;
-        letter-spacing: .08em
+        letter-spacing: .1em
     }
 
-    .sidebar-link {
+    .adm-slink {
         display: flex;
         align-items: center;
         gap: 10px;
         padding: 10px 16px;
-        border-radius: 8px;
+        border-radius: 10px;
         margin: 2px 8px;
-        color: #94A3B8;
-        font-size: .875rem;
+        color: var(--adm-muted);
+        font-size: .85rem;
         font-weight: 500;
         transition: all .2s;
-        cursor: pointer;
-        text-decoration: none
+        text-decoration: none;
+        position: relative
     }
 
-    .sidebar-link:hover {
-        background: #1E293B;
+    .adm-slink:hover {
+        background: var(--adm-card2);
         color: #F1F5F9;
         text-decoration: none
     }
 
-    .sidebar-link.active {
-        background: linear-gradient(135deg, rgba(79, 70, 229, .3), rgba(124, 58, 237, .2));
+    .adm-slink.active {
+        background: linear-gradient(135deg, rgba(99, 102, 241, .2), rgba(139, 92, 246, .1));
         color: #818CF8;
-        border-left: 3px solid #4F46E5;
+        border-left: 3px solid #6366F1;
         padding-left: 13px
     }
 
-    .sidebar-link span.material-icons-round {
+    .adm-slink span.material-icons-round {
         font-size: 1.1rem
     }
 
-    .sidebar-footer {
-        margin-top: auto;
-        padding: 16px
+    .adm-sbadge {
+        margin-left: auto;
+        background: #EF4444;
+        color: #fff;
+        border-radius: 20px;
+        font-size: .65rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        line-height: 1.4
     }
 
-    .sidebar-footer a {
+    .adm-sfoot {
+        margin-top: auto;
+        padding: 16px;
+        border-top: 1px solid var(--adm-border)
+    }
+
+    .adm-sfoot a {
         display: flex;
         align-items: center;
         gap: 8px;
         padding: 10px 16px;
-        border-radius: 8px;
-        color: #EF4444;
-        font-size: .875rem;
+        border-radius: 10px;
+        color: #F87171;
+        font-size: .85rem;
         font-weight: 500;
         transition: all .2s;
-        cursor: pointer;
         text-decoration: none
     }
 
-    .sidebar-footer a:hover {
+    .adm-sfoot a:hover {
         background: rgba(239, 68, 68, .1);
         text-decoration: none
     }
 
-    /* MAIN */
-    .admin-main {
-        margin-left: 240px;
+    /* ── MAIN AREA ────────────────────────────────────────────────────────── */
+    .adm-main {
+        margin-left: 248px;
         flex: 1;
-        background: #0F172A;
+        background: var(--adm-bg);
         min-height: 100vh
     }
 
-    .admin-topbar {
-        background: #1E293B;
-        border-bottom: 1px solid #334155;
-        height: 60px;
+    /* ── TOP BAR ──────────────────────────────────────────────────────────── */
+    .adm-topbar {
+        background: rgba(15, 23, 42, .85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--adm-border);
+        height: 62px;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0 24px;
+        padding: 0 28px;
         position: sticky;
         top: 0;
         z-index: 100
     }
 
-    .admin-topbar h2 {
+    .adm-topbar-left {
+        display: flex;
+        flex-direction: column
+    }
+
+    .adm-topbar-left h2 {
         font-size: 1rem;
         font-weight: 700;
         color: #F1F5F9
     }
 
-    .admin-topbar .admin-badge {
-        background: rgba(79, 70, 229, .2);
-        color: #818CF8;
-        border: 1px solid rgba(79, 70, 229, .4);
-        border-radius: 20px;
+    .adm-topbar-left span {
         font-size: .75rem;
-        padding: 4px 12px;
+        color: var(--adm-muted)
+    }
+
+    .adm-topbar-right {
+        display: flex;
+        align-items: center;
+        gap: 12px
+    }
+
+    .adm-pill {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: .78rem;
         font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px
+        border: 1px solid
     }
 
-    .admin-content {
-        padding: 28px 24px;
-        max-width: 1280px
+    .adm-pill.indigo {
+        background: rgba(99, 102, 241, .15);
+        color: #818CF8;
+        border-color: rgba(99, 102, 241, .3)
     }
 
-    /* ADMIN STAT CARDS */
-    .admin-stat-card {
-        background: #1E293B;
-        border-radius: 12px;
-        padding: 20px;
-        border: 1px solid #334155;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-        transition: transform .2s, border-color .2s
-    }
-
-    .admin-stat-card:hover {
-        transform: translateY(-2px);
-        border-color: #4F46E5
-    }
-
-    .admin-stat-icon {
-        width: 52px;
-        height: 52px;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem
-    }
-
-    .admin-stat-icon.indigo {
-        background: rgba(79, 70, 229, .15);
-        color: #818CF8
-    }
-
-    .admin-stat-icon.orange {
-        background: rgba(249, 115, 22, .15);
-        color: #FB923C
-    }
-
-    .admin-stat-icon.yellow {
-        background: rgba(245, 158, 11, .15);
-        color: #FCD34D
-    }
-
-    .admin-stat-icon.green {
+    .adm-pill.green {
         background: rgba(16, 185, 129, .15);
-        color: #34D399
+        color: #34D399;
+        border-color: rgba(16, 185, 129, .3)
     }
 
-    .admin-stat-icon.purple {
-        background: rgba(124, 58, 237, .15);
-        color: #A78BFA
+    .adm-live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #10B981;
+        animation: pulse 2s infinite
     }
 
-    .admin-stat-value {
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: #F1F5F9
+    @keyframes pulse {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1)
+        }
+
+        50% {
+            opacity: .5;
+            transform: scale(1.3)
+        }
     }
 
-    .admin-stat-label {
-        font-size: .8rem;
-        color: #64748B;
-        font-weight: 500;
-        margin-top: 2px
+    /* ── CONTENT ──────────────────────────────────────────────────────────── */
+    .adm-content {
+        padding: 28px
     }
 
-    /* ADMIN TABLE */
-    .admin-card {
-        background: #1E293B;
-        border-radius: 12px;
-        border: 1px solid #334155;
-        overflow: hidden
+    /* ── KPI GRID ─────────────────────────────────────────────────────────── */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px
     }
 
-    .admin-card-header {
-        padding: 16px 20px;
-        border-bottom: 1px solid #334155;
+    .kpi-card {
+        background: var(--adm-card);
+        border: 1px solid var(--adm-border);
+        border-radius: 14px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+        cursor: default;
+        transition: transform .25s, box-shadow .25s, border-color .25s
+    }
+
+    .kpi-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--kpi-color, #6366F1);
+        border-radius: 14px 14px 0 0
+    }
+
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, .3);
+        border-color: var(--kpi-color, #6366F1)
+    }
+
+    .kpi-top {
         display: flex;
         align-items: center;
         justify-content: space-between
     }
 
-    .admin-card-header h3 {
-        font-size: .95rem;
+    .kpi-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        background: var(--kpi-bg, rgba(99, 102, 241, .15));
+        color: var(--kpi-color, #818CF8)
+    }
+
+    .kpi-trend {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        font-size: .75rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 20px
+    }
+
+    .kpi-trend.up {
+        background: rgba(16, 185, 129, .15);
+        color: #34D399
+    }
+
+    .kpi-trend.down {
+        background: rgba(239, 68, 68, .15);
+        color: #F87171
+    }
+
+    .kpi-trend.neutral {
+        background: rgba(100, 116, 139, .15);
+        color: #94A3B8
+    }
+
+    .kpi-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #F1F5F9;
+        font-variant-numeric: tabular-nums
+    }
+
+    .kpi-label {
+        font-size: .8rem;
+        color: var(--adm-muted);
+        font-weight: 500
+    }
+
+    .kpi-footer {
+        font-size: .72rem;
+        color: var(--adm-muted);
+        border-top: 1px solid var(--adm-border);
+        padding-top: 10px;
+        margin-top: 4px
+    }
+
+    /* ── CHART GRID ───────────────────────────────────────────────────────── */
+    .charts-row {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 20px
+    }
+
+    .charts-row-2 {
+        grid-template-columns: 2fr 1fr
+    }
+
+    .charts-row-3 {
+        grid-template-columns: 1fr 1fr 1fr
+    }
+
+    .chart-card {
+        background: var(--adm-card);
+        border: 1px solid var(--adm-border);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: box-shadow .25s, border-color .25s
+    }
+
+    .chart-card:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, .25);
+        border-color: rgba(99, 102, 241, .3)
+    }
+
+    .chart-header {
+        padding: 18px 20px 10px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px
+    }
+
+    .chart-title {
+        font-size: .9rem;
         font-weight: 700;
         color: #F1F5F9;
         display: flex;
@@ -256,141 +409,683 @@
         gap: 8px
     }
 
-    .admin-table {
-        width: 100%;
-        border-collapse: collapse
+    .chart-title span.material-icons-round {
+        font-size: 1.1rem;
+        color: var(--adm-indigo)
     }
 
-    .admin-table th {
-        padding: 12px 16px;
-        text-align: left;
-        font-size: .75rem;
+    .chart-sub {
+        font-size: .72rem;
+        color: var(--adm-muted);
+        margin-top: 2px
+    }
+
+    .chart-legend {
+        display: flex;
+        gap: 14px;
+        flex-wrap: wrap
+    }
+
+    .legend-dot {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: .72rem;
+        color: var(--adm-muted);
+        font-weight: 500
+    }
+
+    .legend-dot::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        background: var(--lcolor)
+    }
+
+    .chart-body {
+        padding: 4px 16px 16px
+    }
+
+    .chart-body canvas {
+        max-height: 260px
+    }
+
+    /* smaller chart that's square-ish */
+    .chart-body-sm canvas {
+        max-height: 200px
+    }
+
+    /* ── BOTTOM SECTION ───────────────────────────────────────────────────── */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px
+    }
+
+    /* ── TABLE CARD ───────────────────────────────────────────────────────── */
+    .tbl-card {
+        background: var(--adm-card);
+        border: 1px solid var(--adm-border);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: box-shadow .25s
+    }
+
+    .tbl-card:hover {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, .25)
+    }
+
+    .tbl-header {
+        padding: 18px 20px;
+        border-bottom: 1px solid var(--adm-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between
+    }
+
+    .tbl-header h3 {
+        font-size: .9rem;
         font-weight: 700;
-        color: #64748B;
-        text-transform: uppercase;
-        letter-spacing: .05em;
-        background: #0F172A;
-        border-bottom: 1px solid #334155
+        color: #F1F5F9;
+        display: flex;
+        align-items: center;
+        gap: 8px
     }
 
-    .admin-table td {
-        padding: 14px 16px;
-        border-bottom: 1px solid #1E293B;
+    .tbl-cnt {
+        background: var(--adm-card2);
+        color: var(--adm-muted);
+        border-radius: 20px;
+        font-size: .7rem;
+        padding: 3px 10px;
+        font-weight: 600
+    }
+
+    .adm-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: .82rem
+    }
+
+    .adm-table th {
+        padding: 10px 16px;
+        text-align: left;
+        font-size: .7rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        background: var(--adm-bg);
+        border-bottom: 1px solid var(--adm-border)
+    }
+
+    .adm-table td {
+        padding: 13px 16px;
+        border-bottom: 1px solid var(--adm-border);
         color: #CBD5E1;
-        font-size: .875rem;
         vertical-align: middle
     }
 
-    .admin-table tbody tr:hover td {
-        background: rgba(79, 70, 229, .05)
+    .adm-table tbody tr:hover td {
+        background: rgba(99, 102, 241, .04)
     }
 
-    .admin-table tbody tr:last-child td {
+    .adm-table tbody tr:last-child td {
         border-bottom: none
     }
 
-    @media(max-width:768px) {
-        .sidebar {
+    .tid {
+        color: #818CF8;
+        font-weight: 700;
+        font-family: monospace;
+        font-size: .85rem
+    }
+
+    .cname {
+        font-weight: 600;
+        color: #E2E8F0
+    }
+
+    .csub {
+        font-size: .72rem;
+        color: var(--adm-muted);
+        margin-top: 1px
+    }
+
+    /* ── TOP CUSTOMERS CARD ───────────────────────────────────────────────── */
+    .top-card {
+        background: var(--adm-card);
+        border: 1px solid var(--adm-border);
+        border-radius: 14px;
+        overflow: hidden
+    }
+
+    .top-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 20px;
+        border-bottom: 1px solid var(--adm-border);
+        transition: background .2s cursor:default
+    }
+
+    .top-item:last-child {
+        border-bottom: none
+    }
+
+    .top-item:hover {
+        background: rgba(99, 102, 241, .04)
+    }
+
+    .top-rank {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: .7rem;
+        font-weight: 800;
+        flex-shrink: 0
+    }
+
+    .rank-1 {
+        background: #F59E0B;
+        color: #000
+    }
+
+    .rank-2 {
+        background: #94A3B8;
+        color: #000
+    }
+
+    .rank-3 {
+        background: #B45309;
+        color: #fff
+    }
+
+    .rank-n {
+        background: var(--adm-card2);
+        color: var(--adm-muted)
+    }
+
+    .top-name {
+        flex: 1;
+        font-size: .85rem;
+        font-weight: 600;
+        color: #E2E8F0
+    }
+
+    .top-count {
+        font-size: .75rem;
+        color: var(--adm-muted)
+    }
+
+    .top-bar-bg {
+        flex: 1;
+        height: 5px;
+        background: var(--adm-border);
+        border-radius: 10px;
+        overflow: hidden
+    }
+
+    .top-bar {
+        height: 100%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, #6366F1, #8B5CF6);
+        transition: width 1.2s cubic-bezier(.25, .46, .45, .94)
+    }
+
+    /* ── STATUS BADGES ────────────────────────────────────────────────────── */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: .72rem;
+        font-weight: 600;
+        white-space: nowrap
+    }
+
+    .badge-pending {
+        background: rgba(245, 158, 11, .12);
+        color: #FCD34D
+    }
+
+    .badge-accepted {
+        background: rgba(37, 99, 235, .12);
+        color: #60A5FA
+    }
+
+    .badge-progress {
+        background: rgba(124, 58, 237, .12);
+        color: #A78BFA
+    }
+
+    .badge-completed {
+        background: rgba(16, 185, 129, .12);
+        color: #34D399
+    }
+
+    .badge-rejected {
+        background: rgba(239, 68, 68, .12);
+        color: #F87171
+    }
+
+    /* ── COUNTER ANIMATION ─────────────────────────────────────────────────── */
+    @keyframes countUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px)
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0)
+        }
+    }
+
+    .kpi-value {
+        animation: countUp .5s ease both
+    }
+
+    .kpi-card:nth-child(1) .kpi-value {
+        animation-delay: .05s
+    }
+
+    .kpi-card:nth-child(2) .kpi-value {
+        animation-delay: .10s
+    }
+
+    .kpi-card:nth-child(3) .kpi-value {
+        animation-delay: .15s
+    }
+
+    .kpi-card:nth-child(4) .kpi-value {
+        animation-delay: .20s
+    }
+
+    .kpi-card:nth-child(5) .kpi-value {
+        animation-delay: .25s
+    }
+
+    .kpi-card:nth-child(6) .kpi-value {
+        animation-delay: .30s
+    }
+
+    /* ── SECTION DIVIDER ──────────────────────────────────────────────────── */
+    .section-label {
+        font-size: .72rem;
+        font-weight: 700;
+        color: #334155;
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px
+    }
+
+    .section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--adm-border)
+    }
+
+    /* ── GLOW ACCENTS ─────────────────────────────────────────────────────── */
+    .glow-indigo {
+        box-shadow: 0 0 24px rgba(99, 102, 241, .12)
+    }
+
+    .glow-cyan {
+        box-shadow: 0 0 24px rgba(6, 182, 212, .12)
+    }
+
+    /* ── SCROLLBAR ────────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px
+    }
+
+    ::-webkit-scrollbar-track {
+        background: var(--adm-bg)
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: #1E3A5F;
+        border-radius: 3px
+    }
+
+    /* ── RESPONSIVE ───────────────────────────────────────────────────────── */
+    @media(max-width:1100px) {
+        .charts-row-2 {
+            grid-template-columns: 1fr
+        }
+
+        .bottom-grid {
+            grid-template-columns: 1fr
+        }
+    }
+
+    @media(max-width:900px) {
+        .charts-row-3 {
+            grid-template-columns: 1fr 1fr
+        }
+    }
+
+    @media(max-width:700px) {
+        .adm-sidebar {
             transform: translateX(-100%)
         }
 
-        .admin-main {
+        .adm-main {
             margin-left: 0
+        }
+
+        .kpi-grid {
+            grid-template-columns: 1fr 1fr
+        }
+
+        .charts-row-3 {
+            grid-template-columns: 1fr
         }
     }
 </style>
 {% endblock %}
 {% block body %}
-<div class="admin-layout">
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo-dot"><span class="material-icons-round">car_repair</span></div>
-            <span class="brand">AutoFix Pro</span>
+<div class="adm-wrap">
+
+    <!-- ════════════════ SIDEBAR ════════════════ -->
+    <aside class="adm-sidebar">
+        <div class="adm-slogo">
+            <div class="logobadge"><span class="material-icons-round">car_repair</span></div>
+            <div class="logoname">AutoFix Pro<small>Admin Panel</small></div>
         </div>
-        <div class="sidebar-section">Main Menu</div>
-        <a href="{{ url_for('admin.admin_dashboard') }}" class="sidebar-link active">
+
+        <div class="adm-sgroup">Navigation</div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="adm-slink active">
             <span class="material-icons-round">dashboard</span> Dashboard
         </a>
-        <a href="{{ url_for('admin.admin_tickets') }}" class="sidebar-link">
+        <a href="{{ url_for('admin.admin_tickets') }}" class="adm-slink">
             <span class="material-icons-round">confirmation_number</span> Tickets
+            {% if pending_tickets > 0 %}<span class="adm-sbadge">{{ pending_tickets }}</span>{% endif %}
         </a>
-        <a href="{{ url_for('admin.admin_customers') }}" class="sidebar-link">
+        <a href="{{ url_for('admin.admin_customers') }}" class="adm-slink">
             <span class="material-icons-round">people</span> Customers
         </a>
-        <div class="sidebar-footer">
+
+        <div class="adm-sfoot">
             <a href="{{ url_for('admin.admin_logout') }}">
-                <span class="material-icons-round">logout</span> Logout
+                <span class="material-icons-round">logout</span> Sign Out
             </a>
         </div>
     </aside>
 
-    <!-- MAIN -->
-    <main class="admin-main">
-        <div class="admin-topbar">
-            <h2>📊 Dashboard Overview</h2>
-            <div class="admin-badge"><span class="material-icons-round" style="font-size:.9rem">shield</span> Admin
+    <!-- ════════════════ MAIN ════════════════ -->
+    <main class="adm-main">
+
+        <!-- TOP BAR -->
+        <div class="adm-topbar">
+            <div class="adm-topbar-left">
+                <h2>Analytics Dashboard</h2>
+                <span>{{ now if now else 'AutoFix Pro Intelligence Center' }}</span>
+            </div>
+            <div class="adm-topbar-right">
+                <div class="adm-pill green">
+                    <div class="adm-live-dot"></div> Live Data
+                </div>
+                <div class="adm-pill indigo">
+                    <span class="material-icons-round" style="font-size:.9rem">shield</span> Admin
+                </div>
             </div>
         </div>
 
-        <div class="admin-content">
-            <!-- STAT CARDS -->
-            <div class="stats-grid" style="--shadow:0 4px 24px rgba(0,0,0,.3);margin-bottom:28px">
-                <div class="admin-stat-card fade-up">
-                    <div class="admin-stat-icon indigo"><span class="material-icons-round">people</span></div>
+        <div class="adm-content">
+
+            <!-- ── KPI CARDS ──────────────────────────────────────────────── -->
+            <div class="section-label">Key Metrics</div>
+            <div class="kpi-grid">
+
+                <div class="kpi-card" style="--kpi-color:#6366F1;--kpi-bg:rgba(99,102,241,.12)">
+                    <div class="kpi-top">
+                        <div class="kpi-icon"><span class="material-icons-round">payments</span></div>
+                        <div class="kpi-trend up">
+                            <span class="material-icons-round" style="font-size:.85rem">trending_up</span>Revenue
+                        </div>
+                    </div>
                     <div>
-                        <div class="admin-stat-value">{{ total_customers }}</div>
-                        <div class="admin-stat-label">Total Customers</div>
+                        <div class="kpi-value" data-target="{{ total_revenue|round(0,'floor')|int }}" data-prefix="₹">₹0
+                        </div>
+                        <div class="kpi-label">Total Revenue</div>
                     </div>
+                    <div class="kpi-footer">Avg bill: ₹{{ "%.0f"|format(avg_bill) }} per service</div>
                 </div>
-                <div class="admin-stat-card fade-up">
-                    <div class="admin-stat-icon orange"><span class="material-icons-round">confirmation_number</span>
+
+                <div class="kpi-card" style="--kpi-color:#06B6D4;--kpi-bg:rgba(6,182,212,.12)">
+                    <div class="kpi-top">
+                        <div class="kpi-icon"><span class="material-icons-round">people</span></div>
+                        <div class="kpi-trend neutral">Total</div>
                     </div>
                     <div>
-                        <div class="admin-stat-value">{{ total_bookings }}</div>
-                        <div class="admin-stat-label">Total Bookings</div>
+                        <div class="kpi-value" data-target="{{ total_customers }}">0</div>
+                        <div class="kpi-label">Customers</div>
                     </div>
+                    <div class="kpi-footer">Registered in the system</div>
                 </div>
-                <div class="admin-stat-card fade-up">
-                    <div class="admin-stat-icon yellow"><span class="material-icons-round">pending_actions</span></div>
+
+                <div class="kpi-card" style="--kpi-color:#F97316;--kpi-bg:rgba(249,115,22,.12)">
+                    <div class="kpi-top">
+                        <div class="kpi-icon"><span class="material-icons-round">confirmation_number</span></div>
+                        <div class="kpi-trend {% if booking_change >= 0 %}up{% else %}down{% endif %}">
+                            <span class="material-icons-round" style="font-size:.85rem">
+                                {% if booking_change >= 0 %}trending_up{% else %}trending_down{% endif %}
+                            </span>{{ booking_change }}%
+                        </div>
+                    </div>
                     <div>
-                        <div class="admin-stat-value">{{ pending_tickets }}</div>
-                        <div class="admin-stat-label">Pending Tickets</div>
+                        <div class="kpi-value" data-target="{{ total_bookings }}">0</div>
+                        <div class="kpi-label">Total Bookings</div>
                     </div>
+                    <div class="kpi-footer">{{ today_bookings }} new today</div>
                 </div>
-                <div class="admin-stat-card fade-up">
-                    <div class="admin-stat-icon green"><span class="material-icons-round">task_alt</span></div>
+
+                <div class="kpi-card" style="--kpi-color:#F59E0B;--kpi-bg:rgba(245,158,11,.12)">
+                    <div class="kpi-top">
+                        <div class="kpi-icon"><span class="material-icons-round">pending_actions</span></div>
+                        <div class="kpi-trend {{ 'down' if pending_tickets > 5 else 'up' }}">
+                            <span class="material-icons-round" style="font-size:.85rem">schedule</span>Pending
+                        </div>
+                    </div>
                     <div>
-                        <div class="admin-stat-value">{{ completed }}</div>
-                        <div class="admin-stat-label">Completed</div>
+                        <div class="kpi-value" data-target="{{ pending_tickets }}">0</div>
+                        <div class="kpi-label">Pending Tickets</div>
                     </div>
+                    <div class="kpi-footer">Awaiting acceptance</div>
                 </div>
-                <div class="admin-stat-card fade-up">
-                    <div class="admin-stat-icon purple"><span class="material-icons-round">payments</span></div>
+
+                <div class="kpi-card" style="--kpi-color:#8B5CF6;--kpi-bg:rgba(139,92,246,.12)">
+                    <div class="kpi-top">
+                        <div class="kpi-icon"><span class="material-icons-round">build_circle</span></div>
+                        <div class="kpi-trend up"><span class="material-icons-round"
+                                style="font-size:.85rem">autorenew</span>Active</div>
+                    </div>
                     <div>
-                        <div class="admin-stat-value">₹{{ "%.0f"|format(total_revenue) }}</div>
-                        <div class="admin-stat-label">Total Revenue</div>
+                        <div class="kpi-value" data-target="{{ in_progress }}">0</div>
+                        <div class="kpi-label">In Progress</div>
                     </div>
+                    <div class="kpi-footer">Currently being serviced</div>
                 </div>
+
+                <div class="kpi-card" style="--kpi-color:#10B981;--kpi-bg:rgba(16,185,129,.12)">
+                    <div class="kpi-top">
+                        <div class="kpi-icon"><span class="material-icons-round">task_alt</span></div>
+                        <div class="kpi-trend up"><span class="material-icons-round"
+                                style="font-size:.85rem">trending_up</span>Done</div>
+                    </div>
+                    <div>
+                        <div class="kpi-value" data-target="{{ completed }}">0</div>
+                        <div class="kpi-label">Completed</div>
+                    </div>
+                    <div class="kpi-footer">{{ rejected }} rejected</div>
+                </div>
+
+            </div><!-- /kpi-grid -->
+
+            <!-- ── ROW 1: Weekly Bar + Status Donut ────────────────────── -->
+            <div class="section-label">Weekly Performance</div>
+            <div class="charts-row charts-row-2" style="margin-bottom:20px">
+
+                <!-- WEEKLY BOOKINGS BAR CHART -->
+                <div class="chart-card glow-indigo">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                <span class="material-icons-round">bar_chart</span> Weekly Bookings & Revenue
+                            </div>
+                            <div class="chart-sub">Last 7 days overview</div>
+                        </div>
+                        <div class="chart-legend">
+                            <span class="legend-dot" style="--lcolor:#6366F1">Bookings</span>
+                            <span class="legend-dot" style="--lcolor:#06B6D4">Revenue (₹)</span>
+                        </div>
+                    </div>
+                    <div class="chart-body"><canvas id="weeklyChart"></canvas></div>
+                </div>
+
+                <!-- STATUS DONUT -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                <span class="material-icons-round">donut_large</span> Ticket Status
+                            </div>
+                            <div class="chart-sub">Current distribution</div>
+                        </div>
+                    </div>
+                    <div class="chart-body chart-body-sm"><canvas id="statusChart"></canvas></div>
+                </div>
+
             </div>
 
-            <!-- RECENT BOOKINGS -->
-            <div class="admin-card fade-up">
-                <div class="admin-card-header">
-                    <h3><span class="material-icons-round" style="color:#818CF8">history</span> Recent Bookings</h3>
-                    <a href="{{ url_for('admin.admin_tickets') }}" class="btn btn-sm"
-                        style="background:rgba(79,70,229,.2);color:#818CF8;border:none">
-                        View All →
+            <!-- ── ROW 2: Revenue Trend + Vehicle Type ──────────────────── -->
+            <div class="section-label">Revenue & Vehicle Analytics</div>
+            <div class="charts-row charts-row-2" style="margin-bottom:20px">
+
+                <!-- MONTHLY REVENUE LINE CHART -->
+                <div class="chart-card glow-cyan">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                <span class="material-icons-round">show_chart</span> 6-Month Revenue Trend
+                            </div>
+                            <div class="chart-sub">Monthly revenue & bookings</div>
+                        </div>
+                        <div class="chart-legend">
+                            <span class="legend-dot" style="--lcolor:#06B6D4">Revenue</span>
+                            <span class="legend-dot" style="--lcolor:#F97316">Bookings</span>
+                        </div>
+                    </div>
+                    <div class="chart-body"><canvas id="monthlyChart"></canvas></div>
+                </div>
+
+                <!-- VEHICLE TYPE HORIZONTAL BAR -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                <span class="material-icons-round">directions_car</span> Vehicle Types
+                            </div>
+                            <div class="chart-sub">Bookings by vehicle category</div>
+                        </div>
+                    </div>
+                    <div class="chart-body chart-body-sm"><canvas id="vehicleChart"></canvas></div>
+                </div>
+
+            </div>
+
+            <!-- ── ROW 3: Billing Breakdown Polar + Top Customers ───────── -->
+            <div class="section-label">Billing & Customer Insights</div>
+            <div class="charts-row charts-row-2" style="margin-bottom:20px">
+
+                <!-- BILLING POLAR AREA -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <div>
+                            <div class="chart-title">
+                                <span class="material-icons-round">pie_chart</span> Avg Bill Breakdown
+                            </div>
+                            <div class="chart-sub">Average charges per service type</div>
+                        </div>
+                        <div class="chart-legend">
+                            <span class="legend-dot" style="--lcolor:#6366F1">Spare Parts</span>
+                            <span class="legend-dot" style="--lcolor:#F59E0B">Labor</span>
+                            <span class="legend-dot" style="--lcolor:#10B981">Service</span>
+                        </div>
+                    </div>
+                    <div class="chart-body chart-body-sm"><canvas id="billingChart"></canvas></div>
+                </div>
+
+                <!-- TOP CUSTOMERS -->
+                <div class="chart-card top-card">
+                    <div class="chart-header" style="padding:18px 20px">
+                        <div>
+                            <div class="chart-title">
+                                <span class="material-icons-round">emoji_events</span> Top Customers
+                            </div>
+                            <div class="chart-sub">By number of bookings</div>
+                        </div>
+                    </div>
+                    {% set max_b = top_customers[0].bcount if top_customers else 1 %}
+                    {% for c in top_customers %}
+                    <div class="top-item">
+                        <div
+                            class="top-rank {% if loop.index==1 %}rank-1{% elif loop.index==2 %}rank-2{% elif loop.index==3 %}rank-3{% else %}rank-n{% endif %}">
+                            {{ loop.index }}
+                        </div>
+                        <div style="flex:1">
+                            <div class="top-name">{{ c.name }}</div>
+                            <div class="top-bar-bg" style="margin-top:5px">
+                                <div class="top-bar" style="width:0"
+                                    data-width="{{ (c.bcount / max_b * 100)|round(1) }}%"></div>
+                            </div>
+                        </div>
+                        <div class="top-count">{{ c.bcount }} booking{{ 's' if c.bcount != 1 else '' }}</div>
+                    </div>
+                    {% else %}
+                    <div style="padding:40px;text-align:center;color:var(--adm-muted);font-size:.85rem">No customers yet
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+
+            <!-- ── RECENT BOOKINGS TABLE ─────────────────────────────────── -->
+            <div class="section-label">Latest Activity</div>
+            <div class="tbl-card">
+                <div class="tbl-header">
+                    <h3>
+                        <span class="material-icons-round" style="color:var(--adm-indigo)">history</span>
+                        Recent Bookings
+                        <span class="tbl-cnt">Last 8</span>
+                    </h3>
+                    <a href="{{ url_for('admin.admin_tickets') }}" style="font-size:.8rem;color:#818CF8;text-decoration:none;
+          display:flex;align-items:center;gap:4px">
+                        View All <span class="material-icons-round" style="font-size:.9rem">arrow_forward</span>
                     </a>
                 </div>
                 {% if recent_bookings %}
                 <div style="overflow-x:auto">
-                    <table class="admin-table">
+                    <table class="adm-table">
                         <thead>
                             <tr>
-                                <th>Ticket ID</th>
+                                <th>Ticket</th>
                                 <th>Customer</th>
                                 <th>Vehicle</th>
+                                <th>Problem</th>
                                 <th>Status</th>
                                 <th>Date</th>
                             </tr>
@@ -398,24 +1093,293 @@
                         <tbody>
                             {% for b in recent_bookings %}
                             <tr>
-                                <td><strong style="color:#818CF8">{{ b.ticket_id }}</strong></td>
-                                <td>{{ b.customer_name }}</td>
-                                <td>{{ b.vehicle_name }} • {{ b.vehicle_type }}</td>
-                                <td>{% include "_badge.html" %}</td>
-                                <td>{{ b.created_at[:10] }}</td>
+                                <td><span class="tid">{{ b.ticket_id }}</span></td>
+                                <td>
+                                    <div class="cname">{{ b.customer_name }}</div>
+                                </td>
+                                <td>
+                                    <div>{{ b.vehicle_name }}</div>
+                                    <div class="csub">{{ b.vehicle_type }} · {{ b.vehicle_number }}</div>
+                                </td>
+                                <td style="max-width:160px">
+                                    <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#94A3B8"
+                                        title="{{ b.problem }}">
+                                        {{ b.problem[:45] }}{% if b.problem|length > 45 %}…{% endif %}
+                                    </div>
+                                </td>
+                                <td>
+                                    {% set s = b.status %}
+                                    {% if s=='Pending' %}<span class="badge badge-pending">⏳ Pending</span>
+                                    {% elif s=='Accepted' %}<span class="badge badge-accepted">✅ Accepted</span>
+                                    {% elif s=='In Progress' %}<span class="badge badge-progress">🔧 Progress</span>
+                                    {% elif s=='Completed' %}<span class="badge badge-completed">🏁 Done</span>
+                                    {% elif s=='Rejected' %}<span class="badge badge-rejected">❌ Rejected</span>
+                                    {% endif %}
+                                </td>
+                                <td style="color:#475569;font-size:.78rem;white-space:nowrap">{{ b.created_at[:10] }}
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
                 {% else %}
-                <div class="empty-state" style="color:#64748B">
-                    <span class="material-icons-round" style="color:#334155">inbox</span>
-                    <p>No bookings yet.</p>
+                <div style="text-align:center;padding:60px;color:var(--adm-muted)">
+                    <span class="material-icons-round"
+                        style="font-size:2.5rem;display:block;margin-bottom:10px;opacity:.3">inbox</span>
+                    No bookings yet. They will appear here once customers book services.
                 </div>
                 {% endif %}
             </div>
-        </div>
+
+        </div><!-- /adm-content -->
     </main>
-</div>
+</div><!-- /adm-wrap -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // ── CHART.JS GLOBAL DEFAULTS ────────────────────────────────────────────────
+    Chart.defaults.color = '#64748B';
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.font.size = 11;
+
+    const GRID = 'rgba(30,45,69,.6)';
+    const INDIGO = '#6366F1';
+    const VIOLET = '#8B5CF6';
+    const CYAN = '#06B6D4';
+    const ORANGE = '#F97316';
+    const GREEN = '#10B981';
+    const YELLOW = '#F59E0B';
+    const RED = '#EF4444';
+
+    // Safe parse JSON passed from Flask
+    const wLabels = {{ weekly_labels| safe }};
+    const wCounts = {{ weekly_counts| safe }};
+    const wRevenue = {{ weekly_revenue| safe }};
+    const mLabels = {{ monthly_labels| safe }};
+    const mRevenue = {{ monthly_revenue| safe }};
+    const mBook = {{ monthly_bookings| safe }};
+    const sLabels = {{ status_labels| safe }};
+    const sData = {{ status_data| safe }};
+    const vLabels = {{ vtype_labels| safe }};
+    const vData = {{ vtype_data| safe }};
+    const bLabels = {{ billing_labels| safe }};
+    const bData = {{ billing_data| safe }};
+
+    // ── 1. WEEKLY BAR + LINE COMBO ──────────────────────────────────────────────
+    new Chart(document.getElementById('weeklyChart'), {
+        data: {
+            labels: wLabels,
+            datasets: [
+                {
+                    type: 'bar',
+                    label: 'Bookings',
+                    data: wCounts,
+                    backgroundColor: `rgba(99,102,241,.55)`,
+                    borderColor: INDIGO,
+                    borderWidth: 2,
+                    borderRadius: 8,
+                    borderSkipped: false,
+                    yAxisID: 'y'
+                },
+                {
+                    type: 'line',
+                    label: 'Revenue (₹)',
+                    data: wRevenue,
+                    borderColor: CYAN,
+                    backgroundColor: 'rgba(6,182,212,.08)',
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.45,
+                    pointBackgroundColor: CYAN,
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            animation: { duration: 1000, easing: 'easeOutQuart' },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0F172A', borderColor: '#1E2D45', borderWidth: 1,
+                    padding: 12, titleColor: '#F1F5F9', bodyColor: '#94A3B8',
+                    callbacks: {
+                        label: ctx => ctx.dataset.label === 'Revenue (₹)'
+                            ? ` Revenue: ₹${ctx.raw.toLocaleString()}`
+                            : ` Bookings: ${ctx.raw}`
+                    }
+                }
+            },
+            scales: {
+                x: { grid: { color: GRID }, ticks: { color: '#4B5563' } },
+                y: { grid: { color: GRID }, ticks: { color: '#4B5563' }, position: 'left', beginAtZero: true, title: { display: true, text: 'Bookings', color: '#6366F1' } },
+                y1: {
+                    grid: { display: false }, ticks: { color: '#4B5563', callback: v => '₹' + v }, position: 'right', beginAtZero: true,
+                    title: { display: true, text: 'Revenue', color: CYAN }
+                }
+            }
+        }
+    });
+
+    // ── 2. STATUS DONUT ─────────────────────────────────────────────────────────
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: sLabels,
+            datasets: [{
+                data: sData,
+                backgroundColor: [`rgba(245,158,11,.8)`, `rgba(37,99,235,.8)`, `rgba(124,58,237,.8)`, `rgba(16,185,129,.8)`, `rgba(239,68,68,.8)`],
+                borderColor: '#0A0F1E',
+                borderWidth: 3,
+                hoverOffset: 10
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            cutout: '68%',
+            animation: { animateRotate: true, duration: 1200 },
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyleWidth: 10 } },
+                tooltip: {
+                    backgroundColor: '#0F172A', borderColor: '#1E2D45', borderWidth: 1,
+                    padding: 12, titleColor: '#F1F5F9', bodyColor: '#94A3B8'
+                }
+            }
+        }
+    });
+
+    // ── 3. MONTHLY REVENUE LINE ─────────────────────────────────────────────────
+    new Chart(document.getElementById('monthlyChart'), {
+        type: 'line',
+        data: {
+            labels: mLabels,
+            datasets: [
+                {
+                    label: 'Revenue (₹)',
+                    data: mRevenue,
+                    borderColor: CYAN,
+                    backgroundColor: (ctx) => {
+                        const g = ctx.chart.ctx.createLinearGradient(0, 0, 0, 220);
+                        g.addColorStop(0, 'rgba(6,182,212,.35)');
+                        g.addColorStop(1, 'rgba(6,182,212,.01)');
+                        return g;
+                    },
+                    fill: true, tension: 0.45, borderWidth: 2.5,
+                    pointBackgroundColor: CYAN, pointRadius: 5, pointHoverRadius: 8,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Bookings',
+                    data: mBook,
+                    borderColor: ORANGE,
+                    backgroundColor: 'transparent',
+                    borderWidth: 2, borderDash: [6, 4],
+                    pointBackgroundColor: ORANGE, pointRadius: 4, pointHoverRadius: 7,
+                    tension: 0.45,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            animation: { duration: 1200, easing: 'easeOutQuart' },
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    backgroundColor: '#0F172A', borderColor: '#1E2D45', borderWidth: 1,
+                    padding: 12, titleColor: '#F1F5F9', bodyColor: '#94A3B8',
+                    callbacks: { label: ctx => ctx.dataset.label === 'Revenue (₹)' ? ` ₹${ctx.raw.toLocaleString()}` : ` ${ctx.raw} bookings` }
+                }
+            },
+            scales: {
+                x: { grid: { color: GRID }, ticks: { color: '#4B5563' } },
+                y: { grid: { color: GRID }, ticks: { color: '#4B5563', callback: v => '₹' + v.toLocaleString() }, position: 'left', beginAtZero: true },
+                y1: { grid: { display: false }, ticks: { color: '#4B5563' }, position: 'right', beginAtZero: true }
+            }
+        }
+    });
+
+    // ── 4. VEHICLE TYPE HORIZONTAL BAR ──────────────────────────────────────────
+    new Chart(document.getElementById('vehicleChart'), {
+        type: 'bar',
+        data: {
+            labels: vLabels.length ? vLabels : ['No Data'],
+            datasets: [{
+                label: 'Bookings',
+                data: vData.length ? vData : [0],
+                backgroundColor: [`rgba(139,92,246,.7)`, `rgba(99,102,241,.7)`, `rgba(6,182,212,.7)`, `rgba(249,115,22,.7)`, `rgba(16,185,129,.7)`],
+                borderRadius: 8, borderSkipped: false, borderWidth: 0
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: true,
+            animation: { duration: 1000 },
+            plugins: { legend: { display: false }, tooltip: { backgroundColor: '#0F172A', borderColor: '#1E2D45', borderWidth: 1, padding: 12 } },
+            scales: {
+                x: { grid: { color: GRID }, ticks: { color: '#4B5563' }, beginAtZero: true },
+                y: { grid: { display: false }, ticks: { color: '#CBD5E1' } }
+            }
+        }
+    });
+
+    // ── 5. BILLING POLAR AREA ────────────────────────────────────────────────────
+    new Chart(document.getElementById('billingChart'), {
+        type: 'polarArea',
+        data: {
+            labels: bLabels,
+            datasets: [{
+                data: bData.some(v => v > 0) ? bData : [1, 1, 1],
+                backgroundColor: [`rgba(99,102,241,.65)`, `rgba(245,158,11,.65)`, `rgba(16,185,129,.65)`],
+                borderColor: ['#6366F1', '#F59E0B', '#10B981'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: true,
+            animation: { animateRotate: true, duration: 1100 },
+            plugins: {
+                legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true, pointStyleWidth: 10 } },
+                tooltip: {
+                    backgroundColor: '#0F172A', borderColor: '#1E2D45', borderWidth: 1, padding: 12,
+                    callbacks: { label: ctx => ` ₹${ctx.raw.toLocaleString()} avg` }
+                }
+            },
+            scales: { r: { grid: { color: GRID }, ticks: { color: '#4B5563', backdropColor: 'transparent' } } }
+        }
+    });
+
+    // ── KPI COUNTER ANIMATION ────────────────────────────────────────────────────
+    document.querySelectorAll('.kpi-value[data-target]').forEach(el => {
+        const tgt = parseInt(el.dataset.target) || 0;
+        const pfx = el.dataset.prefix || '';
+        const isRupee = pfx === '₹';
+        let start = null;
+        const dur = 1200;
+        const step = ts => {
+            if (!start) start = ts;
+            const prog = Math.min((ts - start) / dur, 1);
+            const ease = 1 - Math.pow(1 - prog, 3);
+            const cur = Math.round(ease * tgt);
+            el.textContent = pfx + (isRupee ? cur.toLocaleString('en-IN') : cur);
+            if (prog < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+    });
+
+    // ── TOP CUSTOMER BAR ANIMATION ───────────────────────────────────────────────
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            document.querySelectorAll('.top-bar').forEach(bar => {
+                bar.style.width = bar.dataset.width;
+            });
+        }, 400);
+    });
+</script>
 {% endblock %}
