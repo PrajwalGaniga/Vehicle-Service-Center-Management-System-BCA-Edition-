@@ -1,0 +1,386 @@
+{% extends "base.html" %}
+{% block title %}Add Bill – AutoFix Pro{% endblock %}
+{% block extra_head %}
+<style>
+    body[data-theme="light"] {
+        --bg: #F1F5F9;
+    }
+
+    .admin-layout {
+        display: flex;
+        min-height: 100vh
+    }
+
+    .sidebar {
+        width: 240px;
+        background: #0F172A;
+        color: #94A3B8;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 200;
+        border-right: 1px solid #1E293B
+    }
+
+    .sidebar-logo {
+        padding: 20px;
+        border-bottom: 1px solid #1E293B;
+        display: flex;
+        align-items: center;
+        gap: 10px
+    }
+
+    .sidebar-logo .brand {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #F1F5F9
+    }
+
+    .sidebar-logo .logo-dot {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center
+    }
+
+    .sidebar-logo .logo-dot span {
+        font-size: 1.2rem;
+        color: #fff
+    }
+
+    .sidebar-section {
+        padding: 16px 12px 8px;
+        font-size: .7rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: .08em
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        margin: 2px 8px;
+        color: #94A3B8;
+        font-size: .875rem;
+        font-weight: 500;
+        transition: all .2s;
+        text-decoration: none
+    }
+
+    .sidebar-link:hover {
+        background: #1E293B;
+        color: #F1F5F9;
+        text-decoration: none
+    }
+
+    .sidebar-link.active {
+        background: linear-gradient(135deg, rgba(79, 70, 229, .3), rgba(124, 58, 237, .2));
+        color: #818CF8;
+        border-left: 3px solid #4F46E5;
+        padding-left: 13px
+    }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 16px
+    }
+
+    .sidebar-footer a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        color: #EF4444;
+        font-size: .875rem;
+        font-weight: 500;
+        transition: all .2s;
+        text-decoration: none
+    }
+
+    .sidebar-footer a:hover {
+        background: rgba(239, 68, 68, .1);
+        text-decoration: none
+    }
+
+    .admin-main {
+        margin-left: 240px;
+        flex: 1;
+        background: #0F172A;
+        min-height: 100vh
+    }
+
+    .admin-topbar {
+        background: #1E293B;
+        border-bottom: 1px solid #334155;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        position: sticky;
+        top: 0;
+        z-index: 100
+    }
+
+    .admin-topbar h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #F1F5F9
+    }
+
+    .admin-badge {
+        background: rgba(79, 70, 229, .2);
+        color: #818CF8;
+        border: 1px solid rgba(79, 70, 229, .4);
+        border-radius: 20px;
+        font-size: .75rem;
+        padding: 4px 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px
+    }
+
+    .admin-content {
+        padding: 28px 24px;
+        max-width: 800px
+    }
+
+    .bill-card {
+        background: #1E293B;
+        border-radius: 12px;
+        border: 1px solid #334155;
+        padding: 24px;
+        margin-bottom: 20px
+    }
+
+    .dark-label {
+        color: #CBD5E1;
+        font-size: .875rem;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 6px
+    }
+
+    .dark-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        background: #0F172A;
+        color: #F1F5F9;
+        font-family: 'Inter', sans-serif;
+        font-size: .9rem;
+        transition: border-color .2s
+    }
+
+    .dark-input:focus {
+        outline: none;
+        border-color: #4F46E5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, .15)
+    }
+
+    .total-preview {
+        background: linear-gradient(135deg, rgba(79, 70, 229, .2), rgba(249, 115, 22, .1));
+        border: 1px solid #4F46E5;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-top: 20px
+    }
+
+    .total-preview .label {
+        color: #94A3B8;
+        font-size: .875rem;
+        margin-bottom: 8px
+    }
+
+    .total-preview .amount {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #818CF8
+    }
+
+    .info-box {
+        background: #0F172A;
+        border-radius: 8px;
+        padding: 14px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        border: 1px solid #334155
+    }
+
+    .info-box span.material-icons-round {
+        color: #818CF8;
+        margin-top: 2px
+    }
+
+    .info-box p {
+        color: #94A3B8;
+        font-size: .85rem;
+        line-height: 1.5
+    }
+</style>
+{% endblock %}
+{% block body %}
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-dot"><span class="material-icons-round">car_repair</span></div>
+            <span class="brand">AutoFix Pro</span>
+        </div>
+        <div class="sidebar-section">Main Menu</div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="sidebar-link">
+            <span class="material-icons-round">dashboard</span> Dashboard
+        </a>
+        <a href="{{ url_for('admin.admin_tickets') }}" class="sidebar-link active">
+            <span class="material-icons-round">confirmation_number</span> Tickets
+        </a>
+        <a href="{{ url_for('admin.admin_customers') }}" class="sidebar-link">
+            <span class="material-icons-round">people</span> Customers
+        </a>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('admin.admin_logout') }}">
+                <span class="material-icons-round">logout</span> Logout
+            </a>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <div class="admin-topbar">
+            <h2>💰 Add Bill – {{ booking.ticket_id }}</h2>
+            <div class="admin-badge"><span class="material-icons-round" style="font-size:.9rem">shield</span> Admin
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <div style="margin-bottom:16px">
+                <a href="{{ url_for('admin.admin_tickets') }}"
+                    style="color:#818CF8;display:flex;align-items:center;gap:6px;font-size:.875rem;text-decoration:none">
+                    <span class="material-icons-round" style="font-size:1rem">arrow_back</span> Back to Tickets
+                </a>
+            </div>
+
+            <!-- BOOKING INFO -->
+            <div class="bill-card fade-up">
+                <h3
+                    style="font-size:.95rem;font-weight:700;color:#F1F5F9;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+                    <span class="material-icons-round" style="color:#818CF8">info</span> Booking Details
+                </h3>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+                    {% for label,val in [('Ticket ID',booking.ticket_id),('Customer Vehicle',booking.vehicle_name),
+                    ('Vehicle No.',booking.vehicle_number),('Type',booking.vehicle_type),
+                    ('Model',booking.model),('Date',booking.preferred_date)] %}
+                    <div style="background:#0F172A;border-radius:8px;padding:10px">
+                        <div style="font-size:.72rem;color:#64748B;font-weight:600;margin-bottom:4px">{{ label }}</div>
+                        <div style="font-size:.875rem;color:#F1F5F9;font-weight:500">{{ val }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div style="background:#0F172A;border-radius:8px;padding:10px;margin-top:12px">
+                    <div style="font-size:.72rem;color:#64748B;font-weight:600;margin-bottom:4px">Problem</div>
+                    <div style="font-size:.875rem;color:#CBD5E1">{{ booking.problem }}</div>
+                </div>
+            </div>
+
+            <!-- BILL FORM -->
+            <div class="bill-card fade-up">
+                <h3
+                    style="font-size:.95rem;font-weight:700;color:#F1F5F9;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+                    <span class="material-icons-round" style="color:#FB923C">receipt_long</span> Billing Details
+                </h3>
+                <div class="info-box">
+                    <span class="material-icons-round">info</span>
+                    <p>After submitting the bill, the ticket status will automatically be marked as <strong
+                            style="color:#34D399">Completed</strong>.</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('admin.add_bill', booking_id=booking.id) }}"
+                    onsubmit="return validateBill()">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+                        <div>
+                            <label class="dark-label">Spare Parts Cost (₹)</label>
+                            <input type="number" class="dark-input" id="spareParts" name="spare_parts" step="0.01"
+                                min="0" value="{{ existing_bill.spare_parts if existing_bill else '' }}"
+                                placeholder="0.00" oninput="calcTotal()" />
+                        </div>
+                        <div>
+                            <label class="dark-label">Labor Charge (₹)</label>
+                            <input type="number" class="dark-input" id="laborCharge" name="labor_charge" step="0.01"
+                                min="0" value="{{ existing_bill.labor_charge if existing_bill else '' }}"
+                                placeholder="0.00" oninput="calcTotal()" />
+                        </div>
+                        <div>
+                            <label class="dark-label">Service Charge (₹)</label>
+                            <input type="number" class="dark-input" id="serviceCharge" name="service_charge" step="0.01"
+                                min="0" value="{{ existing_bill.service_charge if existing_bill else '' }}"
+                                placeholder="0.00" oninput="calcTotal()" />
+                        </div>
+                        <div>
+                            <label class="dark-label">Tax (%)</label>
+                            <input type="number" class="dark-input" id="taxField" name="tax" step="0.1" min="0"
+                                max="100" value="{{ existing_bill.tax if existing_bill else '0' }}" placeholder="0"
+                                oninput="calcTotal()" />
+                        </div>
+                    </div>
+
+                    <div class="total-preview">
+                        <div class="label">💰 Estimated Total Amount</div>
+                        <div class="amount" id="totalPreview">₹0.00</div>
+                        <div style="font-size:.75rem;color:#64748B;margin-top:4px">Subtotal + Tax applied</div>
+                    </div>
+
+                    <div style="display:flex;gap:12px;margin-top:20px;justify-content:flex-end">
+                        <a href="{{ url_for('admin.admin_tickets') }}" style="padding:10px 20px;border-radius:8px;
+              color:#94A3B8;border:1px solid #334155;font-size:.9rem;font-weight:600;text-decoration:none">
+                            Cancel
+                        </a>
+                        <button type="submit" style="padding:10px 24px;border-radius:8px;
+              background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border:none;
+              font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;
+              display:flex;align-items:center;gap:8px">
+                            <span class="material-icons-round">save</span>
+                            {% if existing_bill %}Update Bill{% else %}Submit Bill & Complete{% endif %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function calcTotal() {
+        const sp = parseFloat(document.getElementById('spareParts').value) || 0;
+        const lc = parseFloat(document.getElementById('laborCharge').value) || 0;
+        const sc = parseFloat(document.getElementById('serviceCharge').value) || 0;
+        const tax = parseFloat(document.getElementById('taxField').value) || 0;
+        const sub = sp + lc + sc;
+        const total = sub + (sub * tax / 100);
+        document.getElementById('totalPreview').textContent = '₹' + total.toFixed(2);
+    }
+    function validateBill() {
+        const sp = parseFloat(document.getElementById('spareParts').value) || 0;
+        const lc = parseFloat(document.getElementById('laborCharge').value) || 0;
+        const sc = parseFloat(document.getElementById('serviceCharge').value) || 0;
+        if (sp === 0 && lc === 0 && sc === 0) { alert('Please enter at least one charge amount.'); return false; }
+        return true;
+    }
+    // Init calc
+    calcTotal();
+</script>
+{% endblock %}

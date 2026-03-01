@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Admin Login – AutoFix Pro{% endblock %}
+{% block body %}
+<style>
+    .admin-auth-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 100%);
+        padding: 20px
+    }
+
+    .admin-auth-card {
+        background: #1E293B;
+        border-radius: 16px;
+        padding: 40px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+        border: 1px solid #334155;
+        animation: fadeUp .4s ease
+    }
+
+    .admin-logo {
+        text-align: center;
+        margin-bottom: 28px
+    }
+
+    .admin-logo-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 24px rgba(79, 70, 229, .4)
+    }
+
+    .admin-logo-icon span {
+        font-size: 2rem;
+        color: #fff
+    }
+
+    .admin-logo h1 {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #F1F5F9
+    }
+
+    .admin-logo p {
+        font-size: .875rem;
+        color: #64748B;
+        margin-top: 4px
+    }
+
+    .admin-auth-card .form-label {
+        color: #CBD5E1
+    }
+
+    .admin-auth-card .form-control {
+        background: #0F172A;
+        border-color: #334155;
+        color: #F1F5F9
+    }
+
+    .admin-auth-card .form-control:focus {
+        border-color: #4F46E5;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, .2)
+    }
+
+    .admin-auth-card .input-icon span.material-icons-round {
+        color: #64748B
+    }
+
+    .badge-admin {
+        display: inline-block;
+        background: rgba(79, 70, 229, .15);
+        color: #818CF8;
+        border: 1px solid rgba(79, 70, 229, .3);
+        border-radius: 20px;
+        font-size: .75rem;
+        padding: 4px 12px;
+        font-weight: 600;
+        margin-bottom: 20px
+    }
+
+    .back-link {
+        display: flex;
+        justify-content: center;
+        margin-top: 16px
+    }
+
+    .back-link a {
+        font-size: .8rem;
+        color: #64748B;
+        display: flex;
+        align-items: center;
+        gap: 4px
+    }
+
+    .back-link a:hover {
+        color: #818CF8;
+        text-decoration: none
+    }
+</style>
+
+<div class="admin-auth-wrapper">
+    <div>
+        <div class="admin-auth-card">
+            <div class="admin-logo">
+                <div class="admin-logo-icon"><span class="material-icons-round">admin_panel_settings</span></div>
+                <h1>Admin Portal</h1>
+                <p>AutoFix Pro – Management</p>
+            </div>
+            <div style="text-align:center">
+                <span class="badge-admin">🔒 Restricted Access</span>
+            </div>
+            <form method="POST" action="{{ url_for('admin.admin_login') }}" onsubmit="return validateAdmin()">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <div class="input-icon">
+                        <span class="material-icons-round" style="color:#64748B">person</span>
+                        <input type="text" class="form-control" id="adminUser" name="username"
+                            placeholder="Admin username" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div class="input-icon">
+                        <span class="material-icons-round" style="color:#64748B">lock</span>
+                        <input type="password" class="form-control" id="adminPass" name="password"
+                            placeholder="Admin password" />
+                    </div>
+                </div>
+                <button type="submit" style="width:100%;justify-content:center;padding:12px;
+          background:linear-gradient(135deg,#4F46E5,#7C3AED);color:#fff;border:none;
+          border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;
+          display:flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;
+          transition:opacity .2s" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">
+                    <span class="material-icons-round">shield</span> Access Admin Panel
+                </button>
+            </form>
+        </div>
+        <div class="back-link">
+            <a href="{{ url_for('customer.login') }}">
+                <span class="material-icons-round" style="font-size:.9rem">arrow_back</span>
+                Back to Customer Login
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function validateAdmin() {
+        const u = document.getElementById('adminUser').value.trim();
+        const p = document.getElementById('adminPass').value.trim();
+        if (!u || !p) { alert('Please enter username and password.'); return false; }
+        return true;
+    }
+</script>
+{% endblock %}

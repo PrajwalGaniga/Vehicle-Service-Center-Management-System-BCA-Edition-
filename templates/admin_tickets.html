@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+{% block title %}Manage Tickets – AutoFix Pro{% endblock %}
+{% block extra_head %}
+<style>
+    body[data-theme="light"] {
+        --bg: #F1F5F9;
+    }
+
+    .admin-layout {
+        display: flex;
+        min-height: 100vh
+    }
+
+    .sidebar {
+        width: 240px;
+        background: #0F172A;
+        color: #94A3B8;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 200;
+        border-right: 1px solid #1E293B
+    }
+
+    .sidebar-logo {
+        padding: 20px;
+        border-bottom: 1px solid #1E293B;
+        display: flex;
+        align-items: center;
+        gap: 10px
+    }
+
+    .sidebar-logo .brand {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #F1F5F9
+    }
+
+    .sidebar-logo .logo-dot {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #4F46E5, #7C3AED);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center
+    }
+
+    .sidebar-logo .logo-dot span {
+        font-size: 1.2rem;
+        color: #fff
+    }
+
+    .sidebar-section {
+        padding: 16px 12px 8px;
+        font-size: .7rem;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: .08em
+    }
+
+    .sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        margin: 2px 8px;
+        color: #94A3B8;
+        font-size: .875rem;
+        font-weight: 500;
+        transition: all .2s;
+        text-decoration: none
+    }
+
+    .sidebar-link:hover {
+        background: #1E293B;
+        color: #F1F5F9;
+        text-decoration: none
+    }
+
+    .sidebar-link.active {
+        background: linear-gradient(135deg, rgba(79, 70, 229, .3), rgba(124, 58, 237, .2));
+        color: #818CF8;
+        border-left: 3px solid #4F46E5;
+        padding-left: 13px
+    }
+
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 16px
+    }
+
+    .sidebar-footer a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        color: #EF4444;
+        font-size: .875rem;
+        font-weight: 500;
+        transition: all .2s;
+        text-decoration: none
+    }
+
+    .sidebar-footer a:hover {
+        background: rgba(239, 68, 68, .1);
+        text-decoration: none
+    }
+
+    .admin-main {
+        margin-left: 240px;
+        flex: 1;
+        background: #0F172A;
+        min-height: 100vh
+    }
+
+    .admin-topbar {
+        background: #1E293B;
+        border-bottom: 1px solid #334155;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        position: sticky;
+        top: 0;
+        z-index: 100
+    }
+
+    .admin-topbar h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #F1F5F9
+    }
+
+    .admin-badge {
+        background: rgba(79, 70, 229, .2);
+        color: #818CF8;
+        border: 1px solid rgba(79, 70, 229, .4);
+        border-radius: 20px;
+        font-size: .75rem;
+        padding: 4px 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px
+    }
+
+    .admin-content {
+        padding: 28px 24px
+    }
+
+    .admin-card {
+        background: #1E293B;
+        border-radius: 12px;
+        border: 1px solid #334155;
+        overflow: hidden;
+        margin-bottom: 20px
+    }
+
+    .admin-card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #334155;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px
+    }
+
+    .admin-card-header h3 {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #F1F5F9;
+        display: flex;
+        align-items: center;
+        gap: 8px
+    }
+
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse
+    }
+
+    .admin-table th {
+        padding: 12px 16px;
+        text-align: left;
+        font-size: .75rem;
+        font-weight: 700;
+        color: #64748B;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+        background: #0F172A;
+        border-bottom: 1px solid #334155
+    }
+
+    .admin-table td {
+        padding: 14px 16px;
+        border-bottom: 1px solid #1E293B;
+        color: #CBD5E1;
+        font-size: .875rem;
+        vertical-align: middle
+    }
+
+    .admin-table tbody tr:hover td {
+        background: rgba(79, 70, 229, .05)
+    }
+
+    .admin-table tbody tr:last-child td {
+        border-bottom: none
+    }
+
+    .filter-tabs {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap
+    }
+
+    .filter-tab {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: .8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all .2s;
+        border: 1px solid #334155;
+        color: #94A3B8;
+        text-decoration: none
+    }
+
+    .filter-tab:hover,
+    .filter-tab.active {
+        background: rgba(79, 70, 229, .2);
+        color: #818CF8;
+        border-color: #4F46E5;
+        text-decoration: none
+    }
+
+    .flow-btn {
+        padding: 5px 12px;
+        border-radius: 6px;
+        font-size: .78rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        font-family: 'Inter', sans-serif;
+        transition: all .2s;
+        margin: 2px
+    }
+
+    .flow-btn-accept {
+        background: rgba(37, 99, 235, .2);
+        color: #60A5FA;
+        border: 1px solid rgba(37, 99, 235, .3)
+    }
+
+    .flow-btn-accept:hover {
+        background: rgba(37, 99, 235, .4)
+    }
+
+    .flow-btn-progress {
+        background: rgba(124, 58, 237, .2);
+        color: #A78BFA;
+        border: 1px solid rgba(124, 58, 237, .3)
+    }
+
+    .flow-btn-progress:hover {
+        background: rgba(124, 58, 237, .4)
+    }
+
+    .flow-btn-complete {
+        background: rgba(16, 185, 129, .2);
+        color: #34D399;
+        border: 1px solid rgba(16, 185, 129, .3)
+    }
+
+    .flow-btn-complete:hover {
+        background: rgba(16, 185, 129, .4)
+    }
+
+    .flow-btn-reject {
+        background: rgba(239, 68, 68, .15);
+        color: #F87171;
+        border: 1px solid rgba(239, 68, 68, .3)
+    }
+
+    .flow-btn-reject:hover {
+        background: rgba(239, 68, 68, .3)
+    }
+
+    .flow-btn-bill {
+        background: rgba(249, 115, 22, .2);
+        color: #FB923C;
+        border: 1px solid rgba(249, 115, 22, .3)
+    }
+
+    .flow-btn-bill:hover {
+        background: rgba(249, 115, 22, .4)
+    }
+</style>
+{% endblock %}
+{% block body %}
+<div class="admin-layout">
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-dot"><span class="material-icons-round">car_repair</span></div>
+            <span class="brand">AutoFix Pro</span>
+        </div>
+        <div class="sidebar-section">Main Menu</div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="sidebar-link">
+            <span class="material-icons-round">dashboard</span> Dashboard
+        </a>
+        <a href="{{ url_for('admin.admin_tickets') }}" class="sidebar-link active">
+            <span class="material-icons-round">confirmation_number</span> Tickets
+        </a>
+        <a href="{{ url_for('admin.admin_customers') }}" class="sidebar-link">
+            <span class="material-icons-round">people</span> Customers
+        </a>
+        <div class="sidebar-footer">
+            <a href="{{ url_for('admin.admin_logout') }}">
+                <span class="material-icons-round">logout</span> Logout
+            </a>
+        </div>
+    </aside>
+
+    <main class="admin-main">
+        <div class="admin-topbar">
+            <h2>🎫 Ticket Management</h2>
+            <div class="admin-badge"><span class="material-icons-round" style="font-size:.9rem">shield</span> Admin
+            </div>
+        </div>
+
+        <div class="admin-content">
+            <!-- FILTERS -->
+            <div class="admin-card fade-up">
+                <div class="admin-card-header">
+                    <h3><span class="material-icons-round" style="color:#818CF8">filter_list</span> Filter by Status
+                    </h3>
+                </div>
+                <div style="padding:16px;display:flex;gap:8px;flex-wrap:wrap">
+                    <a href="{{ url_for('admin.admin_tickets') }}"
+                        class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
+                    {% for s in ['Pending','Accepted','In Progress','Completed','Rejected'] %}
+                    <a href="{{ url_for('admin.admin_tickets', status=s) }}"
+                        class="filter-tab {% if status_filter==s %}active{% endif %}">{{ s }}</a>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- TICKETS TABLE -->
+            <div class="admin-card fade-up">
+                <div class="admin-card-header">
+                    <h3><span class="material-icons-round" style="color:#818CF8">list_alt</span>
+                        {% if status_filter %}{{ status_filter }}{% else %}All{% endif %} Tickets
+                        <span
+                            style="background:#334155;color:#94A3B8;border-radius:20px;font-size:.75rem;padding:3px 10px;margin-left:8px">{{
+                            bookings|length }}</span>
+                    </h3>
+                </div>
+                {% if bookings %}
+                <div style="overflow-x:auto">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>Customer</th>
+                                <th>Vehicle</th>
+                                <th>Problem</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in bookings %}
+                            <tr>
+                                <td><strong style="color:#818CF8">{{ b.ticket_id }}</strong></td>
+                                <td style="color:#E2E8F0">{{ b.customer_name }}</td>
+                                <td>
+                                    <div style="font-weight:600;color:#E2E8F0">{{ b.vehicle_name }}</div>
+                                    <div style="font-size:.78rem;color:#64748B">{{ b.vehicle_type }} • {{
+                                        b.vehicle_number }}</div>
+                                </td>
+                                <td style="max-width:180px">
+                                    <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#CBD5E1"
+                                        title="{{ b.problem }}">
+                                        {{ b.problem }}
+                                    </div>
+                                </td>
+                                <td>{% include "_badge.html" %}</td>
+                                <td style="color:#64748B;font-size:.8rem">{{ b.created_at[:10] }}</td>
+                                <td>
+                                    <div style="display:flex;gap:4px;flex-wrap:wrap">
+                                        {% set allowed = status_flow.get(b.status, []) %}
+                                        {% for next_status in allowed %}
+                                        <form method="POST"
+                                            action="{{ url_for('admin.update_status', booking_id=b.id) }}"
+                                            style="display:inline">
+                                            <input type="hidden" name="new_status" value="{{ next_status }}" />
+                                            <button type="submit" class="flow-btn
+                          {% if next_status=='Accepted' %}flow-btn-accept
+                          {% elif next_status=='In Progress' %}flow-btn-progress
+                          {% elif next_status=='Completed' %}flow-btn-complete
+                          {% elif next_status=='Rejected' %}flow-btn-reject{% endif %}">
+                                                {{ next_status }}
+                                            </button>
+                                        </form>
+                                        {% endfor %}
+                                        {% if b.status == 'In Progress' %}
+                                        <a href="{{ url_for('admin.add_bill', booking_id=b.id) }}"
+                                            class="flow-btn flow-btn-bill">
+                                            💰 Add Bill
+                                        </a>
+                                        {% endif %}
+                                        {% if not allowed and b.status not in ['In Progress'] %}
+                                        <span style="color:#334155;font-size:.8rem">—</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state" style="color:#64748B;padding:60px">
+                    <span class="material-icons-round" style="color:#334155">confirmation_number</span>
+                    <p>No tickets found{% if status_filter %} with status "{{ status_filter }}"{% endif %}.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Bill Details – AutoFix Pro{% endblock %}
+{% block body %}
+<style>
+    .bill-hero {
+        background: linear-gradient(135deg, #10B981, #14B8A6);
+        color: #fff;
+        border-radius: var(--radius);
+        padding: 28px;
+        margin-bottom: 24px;
+        text-align: center
+    }
+
+    .bill-hero h2 {
+        font-size: 1.5rem;
+        font-weight: 800
+    }
+
+    .bill-hero .total {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-top: 8px
+    }
+
+    .bill-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: .9rem
+    }
+
+    .bill-row:last-child {
+        border-bottom: none;
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--primary)
+    }
+
+    .bill-label {
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px
+    }
+
+    .bill-amount {
+        font-weight: 600;
+        color: var(--text)
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px
+    }
+
+    .info-item {
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 12px
+    }
+
+    .info-item label {
+        font-size: .75rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        display: block;
+        margin-bottom: 4px
+    }
+
+    .info-item span {
+        font-size: .9rem;
+        font-weight: 600;
+        color: var(--text)
+    }
+</style>
+
+<nav class="navbar">
+    <div class="navbar-brand"><span class="material-icons-round">car_repair</span> AutoFix Pro</div>
+    <div class="navbar-links">
+        <a href="{{ url_for('customer.dashboard') }}" class="nav-btn">
+            <span class="material-icons-round">dashboard</span><span class="label">Dashboard</span>
+        </a>
+        <a href="{{ url_for('customer.view_bookings') }}" class="nav-btn">
+            <span class="material-icons-round">receipt_long</span><span class="label">My Bookings</span>
+        </a>
+        <form action="{{ url_for('customer.logout') }}" method="GET" style="margin:0">
+            <button type="submit" class="nav-logout"><span class="material-icons-round">logout</span></button>
+        </form>
+    </div>
+</nav>
+
+<div class="content" style="max-width:700px">
+    <div style="margin-bottom:16px">
+        <a href="{{ url_for('customer.view_bookings') }}" class="btn btn-ghost btn-sm">
+            <span class="material-icons-round">arrow_back</span> Back to Bookings
+        </a>
+    </div>
+
+    <!-- BOOKING INFO -->
+    <div class="card fade-up" style="margin-bottom:20px">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+            <span class="material-icons-round" style="color:var(--primary)">confirmation_number</span>
+            Ticket: <strong style="color:var(--primary)">{{ booking.ticket_id }}</strong>
+            {% set b = booking %}
+            <span style="margin-left:auto">{% include "_badge.html" %}</span>
+        </h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <label>Vehicle</label><span>{{ booking.vehicle_name }}</span>
+            </div>
+            <div class="info-item">
+                <label>Type</label><span>{{ booking.vehicle_type }}</span>
+            </div>
+            <div class="info-item">
+                <label>Vehicle No.</label><span>{{ booking.vehicle_number }}</span>
+            </div>
+            <div class="info-item">
+                <label>Model</label><span>{{ booking.model }} ({{ booking.model_year }})</span>
+            </div>
+            <div class="info-item">
+                <label>Body Type</label><span>{{ booking.body_type }}</span>
+            </div>
+            <div class="info-item">
+                <label>Service Date</label><span>{{ booking.preferred_date }}</span>
+            </div>
+        </div>
+        <div style="background:var(--bg);border-radius:8px;padding:12px">
+            <label
+                style="font-size:.75rem;color:var(--text-muted);font-weight:500;display:block;margin-bottom:4px">Problem</label>
+            <p style="font-size:.9rem;color:var(--text)">{{ booking.problem }}</p>
+        </div>
+    </div>
+
+    <!-- BILL -->
+    {% if bill %}
+    <div class="bill-hero fade-up">
+        <h2>🎉 Service Completed!</h2>
+        <p style="opacity:.85;margin-top:4px">Total Amount Due</p>
+        <div class="total">₹{{ "%.2f"|format(bill.total_amount) }}</div>
+    </div>
+
+    <div class="card fade-up">
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px">
+            <span class="material-icons-round" style="color:var(--secondary)">receipt_long</span> Bill Breakdown
+        </h3>
+        <div class="bill-row">
+            <div class="bill-label"><span class="material-icons-round" style="font-size:1.1rem">settings</span> Spare
+                Parts</div>
+            <div class="bill-amount">₹{{ "%.2f"|format(bill.spare_parts) }}</div>
+        </div>
+        <div class="bill-row">
+            <div class="bill-label"><span class="material-icons-round" style="font-size:1.1rem">engineering</span> Labor
+                Charge</div>
+            <div class="bill-amount">₹{{ "%.2f"|format(bill.labor_charge) }}</div>
+        </div>
+        <div class="bill-row">
+            <div class="bill-label"><span class="material-icons-round" style="font-size:1.1rem">build_circle</span>
+                Service Charge</div>
+            <div class="bill-amount">₹{{ "%.2f"|format(bill.service_charge) }}</div>
+        </div>
+        <div class="bill-row">
+            <div class="bill-label"><span class="material-icons-round" style="font-size:1.1rem">percent</span> Tax ({{
+                bill.tax }}%)</div>
+            <div class="bill-amount">₹{{
+                "%.2f"|format((bill.spare_parts+bill.labor_charge+bill.service_charge)*bill.tax/100) }}</div>
+        </div>
+        <div class="bill-row" style="margin-top:8px;padding-top:16px;border-top:2px solid var(--border)">
+            <div class="bill-label"><span class="material-icons-round">payments</span> Total Amount</div>
+            <div class="bill-amount" style="font-size:1.1rem;color:var(--primary)">₹{{ "%.2f"|format(bill.total_amount)
+                }}</div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card fade-up">
+        <div class="empty-state">
+            <span class="material-icons-round">hourglass_empty</span>
+            <p>Bill not generated yet.</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

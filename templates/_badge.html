@@ -1,0 +1,14 @@
+{% set s = b.status %}
+{% if s == 'Pending' %}
+<span class="badge badge-pending">⏳ Pending</span>
+{% elif s == 'Accepted' %}
+<span class="badge badge-accepted">✅ Accepted</span>
+{% elif s == 'In Progress' %}
+<span class="badge badge-progress">🔧 In Progress</span>
+{% elif s == 'Completed' %}
+<span class="badge badge-completed">🏁 Completed</span>
+{% elif s == 'Rejected' %}
+<span class="badge badge-rejected">❌ Rejected</span>
+{% else %}
+<span class="badge">{{ s }}</span>
+{% endif %}

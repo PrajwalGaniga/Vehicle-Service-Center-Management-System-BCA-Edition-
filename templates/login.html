@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% block title %}Login – AutoFix Pro{% endblock %}
+{% block body %}
+<style>
+    .auth-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #EFF6FF 0%, #F0FDFA 100%);
+        padding: 20px
+    }
+
+    [data-theme="dark"] .auth-wrapper {
+        background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%)
+    }
+
+    .auth-card {
+        background: var(--card);
+        border-radius: 16px;
+        padding: 40px;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .1);
+        border: 1px solid var(--border);
+        animation: fadeUp .4s ease
+    }
+
+    .auth-logo {
+        text-align: center;
+        margin-bottom: 28px
+    }
+
+    .auth-logo .logo-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #2563EB, #14B8A6);
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, .3)
+    }
+
+    .auth-logo .logo-icon span {
+        font-size: 2rem;
+        color: #fff
+    }
+
+    .auth-logo h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text)
+    }
+
+    .auth-logo p {
+        font-size: .875rem;
+        color: var(--text-muted);
+        margin-top: 4px
+    }
+
+    .auth-tabs {
+        display: flex;
+        background: var(--bg);
+        border-radius: 10px;
+        padding: 4px;
+        margin-bottom: 28px;
+        gap: 4px
+    }
+
+    .auth-tab {
+        flex: 1;
+        text-align: center;
+        padding: 8px;
+        border-radius: 8px;
+        font-size: .875rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--text-muted);
+        transition: all .2s;
+        border: none;
+        background: transparent;
+        font-family: 'Inter', sans-serif
+    }
+
+    .auth-tab.active {
+        background: var(--card);
+        color: var(--primary);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .08)
+    }
+
+    .auth-hint {
+        text-align: center;
+        margin-top: 20px;
+        font-size: .8rem;
+        color: var(--text-muted)
+    }
+
+    .admin-link {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-top: 16px
+    }
+
+    .admin-link a {
+        font-size: .78rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        transition: all .2s
+    }
+
+    .admin-link a:hover {
+        color: var(--primary);
+        background: var(--bg);
+        text-decoration: none
+    }
+
+    .input-icon {
+        position: relative
+    }
+
+    .input-icon span {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        pointer-events: none
+    }
+
+    .input-icon .form-control {
+        padding-left: 40px
+    }
+</style>
+
+<div class="auth-wrapper">
+    <div>
+        <div class="auth-card">
+            <div class="auth-logo">
+                <div class="logo-icon"><span class="material-icons-round">car_repair</span></div>
+                <h1>AutoFix Pro</h1>
+                <p>Vehicle Service Center</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTab" onclick="showTab('login')">Login</button>
+                <button class="auth-tab" id="signupTab" onclick="showTab('signup')">Sign Up</button>
+            </div>
+
+            <!-- LOGIN FORM -->
+            <div id="loginForm">
+                <form method="POST" action="{{ url_for('customer.login') }}" onsubmit="return validateLogin()">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <div class="input-icon">
+                            <span class="material-icons-round">phone</span>
+                            <input type="text" class="form-control" id="loginPhone" name="phone"
+                                placeholder="Enter 10-digit number" maxlength="10" inputmode="numeric" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-icon">
+                            <span class="material-icons-round">lock</span>
+                            <input type="password" class="form-control" id="loginPassword" name="password"
+                                placeholder="Enter your password" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"
+                        style="width:100%;justify-content:center;padding:12px">
+                        <span class="material-icons-round">login</span> Login
+                    </button>
+                </form>
+                <p class="auth-hint">Don't have an account? <a href="#" onclick="showTab('signup')">Sign up here</a></p>
+            </div>
+
+            <!-- SIGNUP FORM (POST to /signup) -->
+            <div id="signupForm" style="display:none">
+                <form method="POST" action="{{ url_for('customer.signup') }}" onsubmit="return validateSignup()">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-icon">
+                            <span class="material-icons-round">person</span>
+                            <input type="text" class="form-control" id="signupName" name="name"
+                                placeholder="Your full name" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <div class="input-icon">
+                            <span class="material-icons-round">phone</span>
+                            <input type="text" class="form-control" id="signupPhone" name="phone"
+                                placeholder="10-digit number" maxlength="10" inputmode="numeric" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-icon">
+                            <span class="material-icons-round">lock</span>
+                            <input type="password" class="form-control" id="signupPassword" name="password"
+                                placeholder="Create a password" />
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"
+                        style="width:100%;justify-content:center;padding:12px">
+                        <span class="material-icons-round">person_add</span> Create Account
+                    </button>
+                </form>
+                <p class="auth-hint">Already have an account? <a href="#" onclick="showTab('login')">Login here</a></p>
+            </div>
+        </div>
+
+        <div class="admin-link">
+            <a href="{{ url_for('admin.admin_login') }}">
+                <span class="material-icons-round" style="font-size:.9rem">admin_panel_settings</span>
+                Admin Login
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function showTab(tab) {
+        const isLogin = tab === 'login';
+        document.getElementById('loginForm').style.display = isLogin ? 'block' : 'none';
+        document.getElementById('signupForm').style.display = isLogin ? 'none' : 'block';
+        document.getElementById('loginTab').classList.toggle('active', isLogin);
+        document.getElementById('signupTab').classList.toggle('active', !isLogin);
+    }
+    // Pick correct tab if flash message came from signup
+    {% if request.args.get('tab') == 'signup' %} showTab('signup'); {% endif %}
+    function validateLogin() {
+        const p = document.getElementById('loginPhone').value.trim();
+        const pw = document.getElementById('loginPassword').value.trim();
+        if (!p || !pw) { alert('Please fill all fields.'); return false; }
+        if (!/^\d{10}$/.test(p)) { alert('Phone must be 10 digits.'); return false; }
+        return true;
+    }
+    function validateSignup() {
+        const n = document.getElementById('signupName').value.trim();
+        const p = document.getElementById('signupPhone').value.trim();
+        const pw = document.getElementById('signupPassword').value.trim();
+        if (!n || !p || !pw) { alert('Please fill all fields.'); return false; }
+        if (!/^\d{10}$/.test(p)) { alert('Phone must be 10 digits.'); return false; }
+        if (pw.length < 4) { alert('Password must be at least 4 characters.'); return false; }
+        return true;
+    }
+</script>
+{% endblock %}
