@@ -322,6 +322,9 @@
         <a href="{{ url_for('admin.admin_customers') }}" class="sidebar-link">
             <span class="material-icons-round">people</span> Customers
         </a>
+        <a href="{{ url_for('admin.admin_mechanics') }}" class="sidebar-link">
+            <span class="material-icons-round">engineering</span> Mechanics
+        </a>
         <div class="sidebar-footer">
             <a href="{{ url_for('admin.admin_logout') }}">
                 <span class="material-icons-round">logout</span> Logout
@@ -373,6 +376,7 @@
                                 <th>Contact</th>
                                 <th>Vehicle</th>
                                 <th>Problem</th>
+                                <th>Mechanic</th>
                                 <th>Status</th>
                                 <th>Date</th>
                                 <th>Actions</th>
@@ -406,6 +410,31 @@
                                     </div>
                                 </td>
                                 <td>
+                                    {% if b.mechanic_name %}
+                                    <div style="font-weight:600;color:#CBD5E1;font-size:.85rem">{{ b.mechanic_name }}
+                                    </div>
+                                    {% if b.work_status %}
+                                    <div style="margin-top:4px">
+                                        {% if b.work_status == 'Ready for Billing' %}
+                                        <span
+                                            style="background:rgba(245,158,11,.15);color:#FBBF24;border:1px solid rgba(245,158,11,.3);border-radius:12px;font-size:.68rem;padding:2px 8px;font-weight:700">⚡
+                                            Ready for Billing</span>
+                                        {% elif b.work_status == 'In Progress' %}
+                                        <span
+                                            style="background:rgba(124,58,237,.15);color:#A78BFA;border:1px solid rgba(124,58,237,.3);border-radius:12px;font-size:.68rem;padding:2px 8px;font-weight:700">🔧
+                                            In Progress</span>
+                                        {% else %}
+                                        <span
+                                            style="background:rgba(71,85,105,.15);color:#94A3B8;border:1px solid rgba(71,85,105,.3);border-radius:12px;font-size:.68rem;padding:2px 8px;font-weight:700">⏳
+                                            {{ b.work_status }}</span>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    {% else %}
+                                    <span style="color:#334155;font-size:.8rem">— Unassigned</span>
+                                    {% endif %}
+                                </td>
+                                <td>
                                     {% include "_badge.html" %}
                                     {% if b.status == 'Payment Pending' and b.payment_method %}
                                     <div style="font-size:.7rem;color:#818CF8;margin-top:4px;font-weight:600">
@@ -416,6 +445,20 @@
                                 <td style="color:#64748B;font-size:.8rem">{{ b.created_at[:10] }}</td>
                                 <td>
                                     <div style="display:flex;gap:4px;flex-wrap:wrap">
+                                        {% if b.status == 'Pending' %}
+                                        <!-- SMART ASSIGN BUTTON: opens modal -->
+                                        <button type="button" class="flow-btn flow-btn-accept"
+                                            onclick="openAssignModal({{ b.id }}, '{{ b.ticket_id }}')">
+                                            👤 Accept &amp; Assign
+                                        </button>
+                                        <form method="POST"
+                                            action="{{ url_for('admin.update_status', booking_id=b.id) }}"
+                                            style="display:inline"
+                                            onsubmit="return confirm('Reject ticket {{ b.ticket_id }}? This cannot be undone.')">
+                                            <input type="hidden" name="new_status" value="Rejected" />
+                                            <button type="submit" class="flow-btn flow-btn-reject">❌ Reject</button>
+                                        </form>
+                                        {% else %}
                                         {% set allowed = status_flow.get(b.status, []) %}
                                         {% for next_status in allowed %}
                                         <form method="POST"
@@ -424,11 +467,10 @@
                                             onsubmit="return confirmAction('{{ next_status }}','{{ b.payment_method or '' }}')">
                                             <input type="hidden" name="new_status" value="{{ next_status }}" />
                                             <button type="submit" class="flow-btn
-                          {% if next_status=='Accepted' %}flow-btn-accept
-                          {% elif next_status=='In Progress' %}flow-btn-progress
-                          {% elif next_status=='Completed' %}flow-btn-complete
-                          {% elif next_status=='Payment Pending' %}flow-btn-bill
-                          {% elif next_status=='Rejected' %}flow-btn-reject{% endif %}">
+                              {% if next_status=='In Progress' %}flow-btn-progress
+                              {% elif next_status=='Completed' %}flow-btn-complete
+                              {% elif next_status=='Payment Pending' %}flow-btn-bill
+                              {% elif next_status=='Rejected' %}flow-btn-reject{% endif %}">
                                                 {% if next_status=='Completed' %}✅{% elif next_status=='Rejected' %}❌{%
                                                 elif next_status=='Payment Pending' %}💳{% endif %}
                                                 {{ next_status }}
@@ -441,8 +483,9 @@
                                             💰 Add Bill
                                         </a>
                                         {% endif %}
-                                        {% if not allowed and b.status not in ['In Progress'] %}
+                                        {% if not allowed and b.status not in ['In Progress', 'Pending'] %}
                                         <span style="color:#334155;font-size:.8rem">—</span>
+                                        {% endif %}
                                         {% endif %}
                                     </div>
                                 </td>
@@ -461,6 +504,53 @@
         </div>
     </main>
 </div>
+
+<!-- ASSIGNMENT MODAL -->
+<div id="assignModal"
+    style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;align-items:center;justify-content:center">
+    <div
+        style="background:#1E293B;border-radius:16px;border:1px solid #334155;padding:30px;width:90%;max-width:480px;animation:fadeUp .25s ease">
+        <h3 style="font-size:1rem;font-weight:700;color:#F1F5F9;margin-bottom:6px">👤 Assign Mechanic</h3>
+        <p style="font-size:.82rem;color:#64748B;margin-bottom:20px" id="assignModalSubtitle">Select an active mechanic
+            for this ticket.</p>
+
+        <form method="POST" id="assignForm">
+            <div style="margin-bottom:16px">
+                <label
+                    style="display:block;font-size:.75rem;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px">Select
+                    Mechanic</label>
+                <select name="mechanic_id" id="mechSelect" required
+                    style="width:100%;padding:10px 14px;background:#0F172A;border:1px solid #334155;border-radius:8px;color:#F1F5F9;font-size:.9rem;font-family:'Inter',sans-serif">
+                    <option value="">— Choose a mechanic —</option>
+                    {% for mech in mechanics %}
+                    {% set tc = mech.task_count %}
+                    <option value="{{ mech.id }}"
+                        style="color:{% if tc <= 2 %}#34D399{% elif tc <= 5 %}#FBBF24{% else %}#F87171{% endif %}">
+                        {{ mech.name }} – {{ mech.specialization }}
+                        ({% if tc <= 2 %}🟢{% elif tc <=5 %}🟡{% else %}🔴{% endif %} {{ tc }} active task{{ 's' if tc
+                            !=1 else '' }}) </option>
+                            {% endfor %}
+                </select>
+            </div>
+
+            <!-- Color key -->
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;font-size:.72rem;color:#475569">
+                <span>🟢 Low (0–2)</span>
+                <span>🟡 Moderate (3–5)</span>
+                <span>🔴 High (6+)</span>
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+                <button type="button" onclick="closeAssignModal()"
+                    style="padding:9px 18px;border-radius:8px;border:1px solid #334155;background:transparent;color:#94A3B8;font-size:.875rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Cancel</button>
+                <button type="submit"
+                    style="padding:9px 20px;border-radius:8px;background:linear-gradient(135deg,#2563EB,#1D4ED8);color:#fff;font-size:.875rem;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px">
+                    <span class="material-icons-round" style="font-size:1rem">check_circle</span> Confirm Assignment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 {% block scripts %}
 <script>
@@ -474,5 +564,22 @@
         }
         return true;
     }
+
+    function openAssignModal(bookingId, ticketId) {
+        document.getElementById('assignModalSubtitle').textContent =
+            'Ticket: ' + ticketId + ' — Select an available mechanic to accept and assign.';
+        document.getElementById('assignForm').action = '/admin/tickets/assign/' + bookingId;
+        document.getElementById('mechSelect').value = '';
+        const m = document.getElementById('assignModal');
+        m.style.display = 'flex';
+    }
+
+    function closeAssignModal() {
+        document.getElementById('assignModal').style.display = 'none';
+    }
+
+    document.getElementById('assignModal').addEventListener('click', function (e) {
+        if (e.target === this) closeAssignModal();
+    });
 </script>
 {% endblock %}

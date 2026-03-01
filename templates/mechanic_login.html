@@ -1,0 +1,324 @@
+{% extends "base.html" %}
+{% block title %}Mechanic Portal – AutoFix Pro{% endblock %}
+{% block body %}
+<style>
+    :root {
+        --mech-primary: #475569;
+        --mech-primary-light: #64748B;
+        --mech-accent: #94A3B8;
+        --mech-glow: rgba(71, 85, 105, 0.3);
+    }
+
+    .mech-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .mech-wrapper::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 20% 50%, rgba(71, 85, 105, 0.15) 0%, transparent 60%),
+            radial-gradient(ellipse at 80% 20%, rgba(100, 116, 139, 0.1) 0%, transparent 50%);
+    }
+
+    .mech-card {
+        background: rgba(30, 41, 59, 0.95);
+        border-radius: 20px;
+        padding: 44px 40px;
+        width: 100%;
+        max-width: 420px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(71, 85, 105, 0.3);
+        border: 1px solid rgba(71, 85, 105, 0.4);
+        animation: fadeUp .4s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    .mech-logo {
+        text-align: center;
+        margin-bottom: 32px;
+    }
+
+    .mech-logo .logo-icon {
+        width: 72px;
+        height: 72px;
+        background: linear-gradient(135deg, #475569, #334155);
+        border-radius: 18px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+        box-shadow: 0 8px 32px var(--mech-glow), 0 0 0 1px rgba(71, 85, 105, 0.5);
+        position: relative;
+    }
+
+    .mech-logo .logo-icon::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 20px;
+        background: linear-gradient(135deg, rgba(71, 85, 105, 0.6), transparent);
+        z-index: -1;
+    }
+
+    .mech-logo .logo-icon span {
+        font-size: 2.2rem;
+        color: #CBD5E1;
+    }
+
+    .mech-logo h1 {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #F1F5F9;
+        letter-spacing: -0.02em;
+    }
+
+    .mech-logo .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        background: rgba(71, 85, 105, 0.3);
+        border: 1px solid rgba(71, 85, 105, 0.5);
+        border-radius: 20px;
+        padding: 5px 14px;
+        font-size: .78rem;
+        font-weight: 700;
+        color: #94A3B8;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    .mech-form-group {
+        margin-bottom: 20px;
+    }
+
+    .mech-label {
+        display: block;
+        font-size: .8rem;
+        font-weight: 600;
+        color: #94A3B8;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    .mech-input-wrap {
+        position: relative;
+    }
+
+    .mech-input-wrap .icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #475569;
+        font-size: 1.1rem;
+        pointer-events: none;
+        transition: color .2s;
+    }
+
+    .mech-input {
+        width: 100%;
+        padding: 12px 14px 12px 44px;
+        background: rgba(15, 23, 42, 0.7);
+        border: 1px solid rgba(71, 85, 105, 0.4);
+        border-radius: 10px;
+        font-size: .9rem;
+        color: #F1F5F9;
+        font-family: 'Inter', sans-serif;
+        transition: all .2s;
+        box-sizing: border-box;
+    }
+
+    .mech-input:focus {
+        outline: none;
+        border-color: #64748B;
+        background: rgba(15, 23, 42, 0.9);
+        box-shadow: 0 0 0 3px rgba(71, 85, 105, 0.2);
+    }
+
+    .mech-input:focus+.icon,
+    .mech-input-wrap:focus-within .icon {
+        color: #94A3B8;
+    }
+
+    .mech-input::placeholder {
+        color: #475569;
+    }
+
+    .mech-btn {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #475569, #334155);
+        color: #F1F5F9;
+        border: none;
+        border-radius: 10px;
+        font-size: .95rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        transition: all .2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        box-shadow: 0 4px 16px rgba(71, 85, 105, 0.4);
+        letter-spacing: 0.02em;
+    }
+
+    .mech-btn:hover {
+        background: linear-gradient(135deg, #64748B, #475569);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 24px rgba(71, 85, 105, 0.5);
+    }
+
+    .mech-btn:active {
+        transform: translateY(0);
+    }
+
+    .mech-divider {
+        text-align: center;
+        margin-top: 24px;
+        font-size: .8rem;
+        color: #475569;
+    }
+
+    .mech-divider a {
+        color: #64748B;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color .2s;
+    }
+
+    .mech-divider a:hover {
+        color: #94A3B8;
+    }
+
+    .info-note {
+        background: rgba(71, 85, 105, 0.15);
+        border: 1px solid rgba(71, 85, 105, 0.3);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: .78rem;
+        color: #64748B;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+    .info-note .material-icons-round {
+        font-size: .95rem;
+        color: #475569;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+
+    /* Alerts */
+    .mech-alert {
+        padding: 12px 14px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: .85rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .mech-alert.error {
+        background: rgba(239, 68, 68, .1);
+        border: 1px solid rgba(239, 68, 68, .3);
+        color: #FCA5A5;
+    }
+
+    .mech-alert.success {
+        background: rgba(16, 185, 129, .1);
+        border: 1px solid rgba(16, 185, 129, .3);
+        color: #6EE7B7;
+    }
+
+    .mech-alert.warning {
+        background: rgba(245, 158, 11, .1);
+        border: 1px solid rgba(245, 158, 11, .3);
+        color: #FCD34D;
+    }
+
+    .mech-alert.info {
+        background: rgba(71, 85, 105, .15);
+        border: 1px solid rgba(71, 85, 105, .4);
+        color: #94A3B8;
+    }
+</style>
+
+<div class="mech-wrapper">
+    <div class="mech-card">
+        <div class="mech-logo">
+            <div class="logo-icon"><span class="material-icons-round">engineering</span></div>
+            <h1>AutoFix Pro</h1>
+            <div class="role-badge">
+                <span class="material-icons-round" style="font-size:.85rem">build_circle</span>
+                Mechanic Portal
+            </div>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+        <div class="mech-alert {{ cat }}">
+            <span class="material-icons-round" style="font-size:1rem">
+                {% if cat=='error' %}error{% elif cat=='success' %}check_circle{% elif cat=='warning' %}warning{% else
+                %}info{% endif %}
+            </span>
+            {{ msg }}
+        </div>
+        {% endfor %}
+        {% endwith %}
+
+        <div class="info-note">
+            <span class="material-icons-round">info</span>
+            <span>Login with your registered phone number. Contact the admin if you face any issues.</span>
+        </div>
+
+        <form method="POST" action="{{ url_for('mechanic.mechanic_login') }}" onsubmit="return validateMechLogin()">
+            <div class="mech-form-group">
+                <label class="mech-label">Phone Number</label>
+                <div class="mech-input-wrap">
+                    <input type="text" class="mech-input" id="mechPhone" name="phone"
+                        placeholder="Enter your 10-digit phone" maxlength="10" inputmode="numeric" autocomplete="tel" />
+                    <span class="material-icons-round icon">phone</span>
+                </div>
+            </div>
+            <button type="submit" class="mech-btn">
+                <span class="material-icons-round">login</span> Access Dashboard
+            </button>
+        </form>
+
+        <div class="mech-divider" style="margin-top:28px">
+            <a href="{{ url_for('customer.login') }}">
+                <span class="material-icons-round" style="font-size:.85rem;vertical-align:middle">arrow_back</span>
+                Customer Portal
+            </a>
+            &nbsp;·&nbsp;
+            <a href="{{ url_for('admin.admin_login') }}">Admin Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+    function validateMechLogin() {
+        const p = document.getElementById('mechPhone').value.trim();
+        if (!p) { alert('Please enter your phone number.'); return false; }
+        if (!/^\d{10}$/.test(p)) { alert('Phone must be exactly 10 digits.'); return false; }
+        return true;
+    }
+</script>
+{% endblock %}

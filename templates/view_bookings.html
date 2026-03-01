@@ -40,6 +40,7 @@
                         <th>Ticket ID</th>
                         <th>Vehicle</th>
                         <th>Problem</th>
+                        <th>Mechanic</th>
                         <th>Status</th>
                         <th>Preferred Date</th>
                         <th>Actions</th>
@@ -63,6 +64,17 @@
                                 title="{{ b.problem }}">
                                 {{ b.problem }}
                             </div>
+                        </td>
+                        <td>
+                            {% if b.mechanic_name %}
+                            <div style="display:flex;align-items:center;gap:6px">
+                                <span class="material-icons-round"
+                                    style="font-size:.9rem;color:var(--primary)">engineering</span>
+                                <span style="font-size:.85rem;font-weight:600">{{ b.mechanic_name }}</span>
+                            </div>
+                            {% else %}
+                            <span style="font-size:.8rem;color:var(--text-muted)">—</span>
+                            {% endif %}
                         </td>
                         <td>{% include "_badge.html" %}</td>
                         <td>{{ b.preferred_date }}</td>

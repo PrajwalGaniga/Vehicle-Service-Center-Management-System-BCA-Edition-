@@ -3,6 +3,7 @@ import os
 from flask import Flask, redirect, url_for
 from customer import customer_bp
 from admin import admin_bp
+from mechanic import mechanic_bp
 
 app = Flask(__name__)
 app.secret_key = "autofix_pro_secret_key_2024"
@@ -24,12 +25,23 @@ def init_db():
             password TEXT    NOT NULL
         )
     """)
-    # Safe migration: add email if it doesn't exist
     try:
         cursor.execute("ALTER TABLE customers ADD COLUMN email TEXT DEFAULT ''")
         print("[AutoFix Pro] Migration: added 'email' to customers.")
     except Exception:
-        pass  # Column already exists
+        pass
+
+    # ── MECHANICS ─────────────────────────────────────────────────────────────
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS mechanics (
+            id                INTEGER PRIMARY KEY AUTOINCREMENT,
+            name              TEXT    NOT NULL,
+            phone             TEXT    NOT NULL UNIQUE,
+            experience_years  INTEGER NOT NULL DEFAULT 0,
+            specialization    TEXT    NOT NULL DEFAULT 'General',
+            status            TEXT    NOT NULL DEFAULT 'Active'
+        )
+    """)
 
     # ── BOOKINGS ──────────────────────────────────────────────────────────────
     cursor.execute("""
@@ -51,12 +63,17 @@ def init_db():
             FOREIGN KEY (customer_id) REFERENCES customers(id)
         )
     """)
-    # Safe migration: add payment_method if it doesn't exist
-    try:
-        cursor.execute("ALTER TABLE bookings ADD COLUMN payment_method TEXT DEFAULT ''")
-        print("[AutoFix Pro] Migration: added 'payment_method' to bookings.")
-    except Exception:
-        pass
+    # Safe migrations for bookings
+    for col, definition in [
+        ("payment_method", "TEXT DEFAULT ''"),
+        ("mechanic_id",    "INTEGER REFERENCES mechanics(id)"),
+        ("work_status",    "TEXT DEFAULT ''"),
+    ]:
+        try:
+            cursor.execute(f"ALTER TABLE bookings ADD COLUMN {col} {definition}")
+            print(f"[AutoFix Pro] Migration: added '{col}' to bookings.")
+        except Exception:
+            pass
 
     # ── BILLS ─────────────────────────────────────────────────────────────────
     cursor.execute("""
@@ -72,7 +89,7 @@ def init_db():
         )
     """)
 
-    # ── NOTIFICATIONS (NEW) ───────────────────────────────────────────────────
+    # ── NOTIFICATIONS ─────────────────────────────────────────────────────────
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS notifications (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,6 +101,18 @@ def init_db():
         )
     """)
 
+    # ── SEED MECHANICS (only if table is empty) ───────────────────────────────
+    count = cursor.execute("SELECT COUNT(*) FROM mechanics").fetchone()[0]
+    if count == 0:
+        cursor.executemany(
+            "INSERT INTO mechanics (name, phone, experience_years, specialization, status) VALUES (?,?,?,?,?)",
+            [
+                ("Rajesh Kumar",  "9876543210", 8, "Engine & Transmission", "Active"),
+                ("Suresh Sharma", "9123456789", 5, "Electrical & AC",        "Active"),
+            ]
+        )
+        print("[AutoFix Pro] Seeded 2 sample mechanics.")
+
     # Enable WAL mode for concurrent read/write without locking
     conn.execute("PRAGMA journal_mode=WAL")
     conn.commit()
@@ -94,6 +123,7 @@ def init_db():
 # Register blueprints
 app.register_blueprint(customer_bp)
 app.register_blueprint(admin_bp, url_prefix="/admin")
+app.register_blueprint(mechanic_bp, url_prefix="/mechanic")
 
 
 @app.route("/")

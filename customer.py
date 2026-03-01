@@ -196,10 +196,13 @@ def book_service():
 @login_required
 def view_bookings():
     conn = get_db()
-    bookings = conn.execute(
-        "SELECT * FROM bookings WHERE customer_id=? ORDER BY created_at DESC",
-        (session["customer_id"],)
-    ).fetchall()
+    bookings = conn.execute("""
+        SELECT b.*, m.name as mechanic_name
+        FROM bookings b
+        LEFT JOIN mechanics m ON b.mechanic_id = m.id
+        WHERE b.customer_id=?
+        ORDER BY b.created_at DESC
+    """, (session["customer_id"],)).fetchall()
     conn.close()
     return render_template("view_bookings.html", bookings=bookings)
 

@@ -8,34 +8,72 @@
         align-items: center;
         justify-content: center;
         background: linear-gradient(135deg, #EFF6FF 0%, #F0FDFA 100%);
-        padding: 20px
+        padding: 20px;
+        flex-direction: column;
+        gap: 16px;
     }
 
     [data-theme="dark"] .auth-wrapper {
         background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%)
     }
 
+    .auth-cards-row {
+        display: flex;
+        gap: 20px;
+        align-items: stretch;
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+        max-width: 900px;
+    }
+
     .auth-card {
         background: var(--card);
         border-radius: 16px;
-        padding: 40px;
+        padding: 36px 32px;
         width: 100%;
-        max-width: 440px;
+        max-width: 400px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, .1);
         border: 1px solid var(--border);
-        animation: fadeUp .4s ease
+        animation: fadeUp .4s ease;
+        flex: 1;
+        min-width: 280px;
+    }
+
+    .auth-card.mechanic {
+        background: rgba(15, 23, 42, .85);
+        border: 1px solid rgba(71, 85, 105, .4);
+        max-width: 280px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        transition: border-color .2s, transform .2s;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    [data-theme="light"] .auth-card.mechanic {
+        background: #1E293B;
+    }
+
+    .auth-card.mechanic:hover {
+        border-color: rgba(71, 85, 105, .8);
+        transform: translateY(-2px);
+        text-decoration: none;
     }
 
     .auth-logo {
         text-align: center;
-        margin-bottom: 28px
+        margin-bottom: 24px
     }
 
     .auth-logo .logo-icon {
-        width: 64px;
-        height: 64px;
+        width: 60px;
+        height: 60px;
         background: linear-gradient(135deg, #2563EB, #14B8A6);
-        border-radius: 16px;
+        border-radius: 14px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -44,12 +82,12 @@
     }
 
     .auth-logo .logo-icon span {
-        font-size: 2rem;
+        font-size: 1.8rem;
         color: #fff
     }
 
     .auth-logo h1 {
-        font-size: 1.5rem;
+        font-size: 1.35rem;
         font-weight: 800;
         color: var(--text)
     }
@@ -65,7 +103,7 @@
         background: var(--bg);
         border-radius: 10px;
         padding: 4px;
-        margin-bottom: 28px;
+        margin-bottom: 24px;
         gap: 4px
     }
 
@@ -92,33 +130,9 @@
 
     .auth-hint {
         text-align: center;
-        margin-top: 20px;
+        margin-top: 16px;
         font-size: .8rem;
         color: var(--text-muted)
-    }
-
-    .admin-link {
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-        margin-top: 16px
-    }
-
-    .admin-link a {
-        font-size: .78rem;
-        color: var(--text-muted);
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 8px;
-        border-radius: 6px;
-        transition: all .2s
-    }
-
-    .admin-link a:hover {
-        color: var(--primary);
-        background: var(--bg);
-        text-decoration: none
     }
 
     .input-icon {
@@ -138,15 +152,105 @@
     .input-icon .form-control {
         padding-left: 40px
     }
+
+    /* Mechanic card content */
+    .mech-card-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #475569, #334155);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px;
+        box-shadow: 0 8px 24px rgba(71, 85, 105, .4);
+    }
+
+    .mech-card-icon span {
+        font-size: 2rem;
+        color: #CBD5E1;
+    }
+
+    .mech-card-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #F1F5F9;
+        margin-bottom: 6px;
+    }
+
+    .mech-card-sub {
+        font-size: .8rem;
+        color: #64748B;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    .mech-cta {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 22px;
+        background: linear-gradient(135deg, #475569, #334155);
+        color: #CBD5E1;
+        border-radius: 10px;
+        font-size: .875rem;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all .2s;
+        border: 1px solid rgba(71, 85, 105, .4);
+        width: 100%;
+        justify-content: center;
+    }
+
+    .mech-cta:hover {
+        background: linear-gradient(135deg, #64748B, #475569);
+        color: #F1F5F9;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .admin-footer-link {
+        font-size: .78rem;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 6px 14px;
+        border-radius: 8px;
+        transition: all .2s;
+        text-decoration: none;
+        border: 1px solid transparent;
+    }
+
+    .admin-footer-link:hover {
+        color: var(--primary);
+        background: var(--bg);
+        border-color: var(--border);
+        text-decoration: none;
+    }
+
+    @media (max-width: 700px) {
+        .auth-card.mechanic {
+            max-width: 100%;
+        }
+    }
 </style>
 
 <div class="auth-wrapper">
-    <div>
+    <!-- Hero tagline -->
+    <div style="text-align:center;max-width:600px;margin-bottom:8px">
+        <h1 style="font-size:1.6rem;font-weight:900;color:var(--text);letter-spacing:-.03em">🛠 AutoFix Pro</h1>
+        <p style="font-size:.9rem;color:var(--text-muted);margin-top:6px">Vehicle Service Center – Choose your portal to
+            continue</p>
+    </div>
+
+    <div class="auth-cards-row">
+        <!-- ─── CUSTOMER CARD ─── -->
         <div class="auth-card">
             <div class="auth-logo">
-                <div class="logo-icon"><span class="material-icons-round">car_repair</span></div>
-                <h1>AutoFix Pro</h1>
-                <p>Vehicle Service Center</p>
+                <div class="logo-icon"><span class="material-icons-round">directions_car</span></div>
+                <h1>Customer Portal</h1>
+                <p>Book services, track your vehicle &amp; pay bills</p>
             </div>
 
             <div class="auth-tabs">
@@ -175,13 +279,13 @@
                     </div>
                     <button type="submit" class="btn btn-primary"
                         style="width:100%;justify-content:center;padding:12px">
-                        <span class="material-icons-round">login</span> Login
+                        <span class="material-icons-round">login</span> Customer Login
                     </button>
                 </form>
                 <p class="auth-hint">Don't have an account? <a href="#" onclick="showTab('signup')">Sign up here</a></p>
             </div>
 
-            <!-- SIGNUP FORM (POST to /signup) -->
+            <!-- SIGNUP FORM -->
             <div id="signupForm" style="display:none">
                 <form method="POST" action="{{ url_for('customer.signup') }}" onsubmit="return validateSignup()">
                     <div class="form-group">
@@ -224,16 +328,29 @@
                 <p class="auth-hint">Already have an account? <a href="#" onclick="showTab('login')">Login here</a></p>
             </div>
         </div>
+
+        <!-- ─── MECHANIC CARD ─── -->
+        <div class="auth-card mechanic">
+            <div class="mech-card-icon">
+                <span class="material-icons-round">engineering</span>
+            </div>
+            <div class="mech-card-title">Mechanic Portal</div>
+            <div class="mech-card-sub">Field workers can view their assigned jobs and update work status in real time.
+            </div>
+            <a href="{{ url_for('mechanic.mechanic_login') }}" class="mech-cta">
+                <span class="material-icons-round" style="font-size:1rem">build_circle</span>
+                Enter Mechanic Portal
+            </a>
+        </div>
     </div>
 
-    <div class="admin-link">
-        <a href="{{ url_for('admin.admin_login') }}">
-            <span class="material-icons-round" style="font-size:.9rem">admin_panel_settings</span>
-            Admin Login
-        </a>
-    </div>
+    <!-- Admin subtle link -->
+    <a href="{{ url_for('admin.admin_login') }}" class="admin-footer-link">
+        <span class="material-icons-round" style="font-size:.9rem">admin_panel_settings</span>
+        Admin Dashboard
+    </a>
 </div>
-</div>
+
 {% endblock %}
 {% block scripts %}
 <script>

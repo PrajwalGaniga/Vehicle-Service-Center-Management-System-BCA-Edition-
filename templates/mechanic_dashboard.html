@@ -1,0 +1,662 @@
+{% extends "base.html" %}
+{% block title %}Mechanic Dashboard – AutoFix Pro{% endblock %}
+{% block extra_head %}
+<style>
+    body[data-theme="light"] {
+        --bg: #F1F5F9;
+    }
+
+    /* ─── SLATE/STEEL THEME ─── */
+    :root {
+        --mech-bg: #0F172A;
+        --mech-card: #1E293B;
+        --mech-border: #334155;
+        --mech-primary: #475569;
+        --mech-accent: #64748B;
+        --mech-text: #F1F5F9;
+        --mech-muted: #94A3B8;
+        --mech-dim: #64748B;
+    }
+
+    .mech-layout {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .mech-sidebar {
+        width: 240px;
+        background: #0A0F1C;
+        color: #94A3B8;
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 200;
+        border-right: 1px solid #1E293B;
+    }
+
+    .mech-sidebar-logo {
+        padding: 20px;
+        border-bottom: 1px solid #1E293B;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .mech-sidebar-logo .logo-dot {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, #475569, #334155);
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(71, 85, 105, .4);
+    }
+
+    .mech-sidebar-logo .logo-dot span {
+        font-size: 1.2rem;
+        color: #CBD5E1;
+    }
+
+    .mech-sidebar-logo .brand {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #F1F5F9;
+    }
+
+    .mech-sidebar-logo .role {
+        font-size: .7rem;
+        color: #64748B;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+    }
+
+    .mech-sidebar-section {
+        padding: 16px 12px 8px;
+        font-size: .7rem;
+        font-weight: 700;
+        color: #334155;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+    }
+
+    .mech-sidebar-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        margin: 2px 8px;
+        color: #64748B;
+        font-size: .875rem;
+        font-weight: 500;
+        transition: all .2s;
+        text-decoration: none;
+    }
+
+    .mech-sidebar-link:hover {
+        background: #1E293B;
+        color: #CBD5E1;
+        text-decoration: none;
+    }
+
+    .mech-sidebar-link.active {
+        background: linear-gradient(135deg, rgba(71, 85, 105, .3), rgba(51, 65, 85, .2));
+        color: #94A3B8;
+        border-left: 3px solid #475569;
+        padding-left: 13px;
+    }
+
+    .mech-sidebar-footer {
+        margin-top: auto;
+        padding: 16px;
+    }
+
+    .mech-sidebar-footer a {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        color: #EF4444;
+        font-size: .875rem;
+        font-weight: 500;
+        transition: all .2s;
+        text-decoration: none;
+    }
+
+    .mech-sidebar-footer a:hover {
+        background: rgba(239, 68, 68, .1);
+        text-decoration: none;
+    }
+
+    /* ── Main ── */
+    .mech-main {
+        margin-left: 240px;
+        flex: 1;
+        background: #0F172A;
+        min-height: 100vh;
+    }
+
+    .mech-topbar {
+        background: #1E293B;
+        border-bottom: 1px solid #334155;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 24px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+
+    .mech-topbar h2 {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #F1F5F9;
+    }
+
+    .mech-badge {
+        background: rgba(71, 85, 105, .2);
+        color: #94A3B8;
+        border: 1px solid rgba(71, 85, 105, .4);
+        border-radius: 20px;
+        font-size: .75rem;
+        padding: 4px 12px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .mech-content {
+        padding: 28px 24px;
+    }
+
+    /* ── KPI Cards ── */
+    .mech-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .mech-kpi {
+        background: #1E293B;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .mech-kpi .kpi-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .kpi-icon.blue {
+        background: rgba(37, 99, 235, .2);
+    }
+
+    .kpi-icon.green {
+        background: rgba(16, 185, 129, .2);
+    }
+
+    .kpi-icon.amber {
+        background: rgba(245, 158, 11, .2);
+    }
+
+    .mech-kpi .kpi-icon span {
+        font-size: 1.3rem;
+    }
+
+    .kpi-icon.blue span {
+        color: #60A5FA;
+    }
+
+    .kpi-icon.green span {
+        color: #34D399;
+    }
+
+    .kpi-icon.amber span {
+        color: #FBBF24;
+    }
+
+    .mech-kpi .kpi-val {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: #F1F5F9;
+        line-height: 1;
+    }
+
+    .mech-kpi .kpi-lbl {
+        font-size: .75rem;
+        color: #64748B;
+        margin-top: 4px;
+        font-weight: 500;
+    }
+
+    /* ── Job Cards ── */
+    .mech-jobs {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .mech-job-card {
+        background: #1E293B;
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 20px 22px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        align-items: start;
+        transition: border-color .2s;
+    }
+
+    .mech-job-card:hover {
+        border-color: #475569;
+    }
+
+    .mech-job-card.ready-billing {
+        border-color: rgba(245, 158, 11, .4);
+    }
+
+    .mech-job-card.in-progress {
+        border-color: rgba(124, 58, 237, .4);
+    }
+
+    .mech-job-card.completed {
+        border-color: rgba(16, 185, 129, .3);
+        opacity: .7;
+    }
+
+    .job-ticket {
+        font-size: .8rem;
+        font-weight: 700;
+        color: #94A3B8;
+        letter-spacing: .04em;
+    }
+
+    .job-vehicle-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #F1F5F9;
+        margin: 4px 0;
+    }
+
+    .job-meta-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+    }
+
+    .job-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: .78rem;
+        color: #64748B;
+    }
+
+    .job-meta-item span.material-icons-round {
+        font-size: .9rem;
+    }
+
+    .job-problem {
+        margin-top: 10px;
+        background: rgba(15, 23, 42, .5);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: .8rem;
+        color: #94A3B8;
+        border-left: 3px solid #334155;
+        line-height: 1.5;
+    }
+
+    /* ── Work Status Badge ── */
+    .work-status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: .75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .05em;
+    }
+
+    .ws-accepted {
+        background: rgba(71, 85, 105, .2);
+        color: #94A3B8;
+        border: 1px solid rgba(71, 85, 105, .4);
+    }
+
+    .ws-progress {
+        background: rgba(124, 58, 237, .2);
+        color: #A78BFA;
+        border: 1px solid rgba(124, 58, 237, .4);
+    }
+
+    .ws-billing {
+        background: rgba(245, 158, 11, .2);
+        color: #FBBF24;
+        border: 1px solid rgba(245, 158, 11, .4);
+    }
+
+    .ws-completed {
+        background: rgba(16, 185, 129, .15);
+        color: #34D399;
+        border: 1px solid rgba(16, 185, 129, .3);
+    }
+
+    /* ── Toggle Buttons ── */
+    .job-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-end;
+    }
+
+    .ws-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 18px;
+        border-radius: 8px;
+        font-size: .82rem;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+        font-family: 'Inter', sans-serif;
+        transition: all .2s;
+        white-space: nowrap;
+    }
+
+    .ws-btn-start {
+        background: linear-gradient(135deg, #475569, #334155);
+        color: #CBD5E1;
+        box-shadow: 0 2px 8px rgba(71, 85, 105, .3);
+    }
+
+    .ws-btn-start:hover {
+        background: linear-gradient(135deg, #64748B, #475569);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(71, 85, 105, .4);
+    }
+
+    .ws-btn-billing {
+        background: linear-gradient(135deg, rgba(245, 158, 11, .3), rgba(180, 110, 0, .3));
+        color: #FBBF24;
+        border: 1px solid rgba(245, 158, 11, .4);
+    }
+
+    .ws-btn-billing:hover {
+        background: linear-gradient(135deg, rgba(245, 158, 11, .5), rgba(180, 110, 0, .5));
+        transform: translateY(-1px);
+    }
+
+    .ready-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-size: .8rem;
+        font-weight: 700;
+        background: rgba(245, 158, 11, .1);
+        color: #FBBF24;
+        border: 1px dashed rgba(245, 158, 11, .4);
+    }
+
+    /* ── Empty State ── */
+    .mech-empty {
+        text-align: center;
+        padding: 70px 20px;
+        color: #334155;
+    }
+
+    .mech-empty span {
+        font-size: 3.5rem;
+        display: block;
+        margin-bottom: 16px;
+        color: #1E293B;
+    }
+
+    .mech-empty p {
+        font-size: 1rem;
+        color: #475569;
+    }
+
+    /* ── Section header ── */
+    .mech-section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .mech-section-header h3 {
+        font-size: .95rem;
+        font-weight: 700;
+        color: #F1F5F9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .count-chip {
+        background: #334155;
+        color: #94A3B8;
+        border-radius: 20px;
+        font-size: .75rem;
+        padding: 3px 10px;
+        font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+        .mech-sidebar {
+            display: none;
+        }
+
+        .mech-main {
+            margin-left: 0;
+        }
+
+        .mech-kpi-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .mech-job-card {
+            grid-template-columns: 1fr;
+        }
+
+        .job-actions {
+            align-items: flex-start;
+        }
+    }
+</style>
+{% endblock %}
+{% block body %}
+<div class="mech-layout">
+    <!-- SIDEBAR -->
+    <aside class="mech-sidebar">
+        <div class="mech-sidebar-logo">
+            <div class="logo-dot"><span class="material-icons-round">engineering</span></div>
+            <div>
+                <div class="brand">AutoFix Pro</div>
+                <div class="role">Mechanic Portal</div>
+            </div>
+        </div>
+        <div class="mech-sidebar-section">My Work</div>
+        <a href="{{ url_for('mechanic.mechanic_dashboard') }}" class="mech-sidebar-link active">
+            <span class="material-icons-round">build_circle</span> My Jobs
+        </a>
+        <div class="mech-sidebar-footer">
+            <a href="{{ url_for('mechanic.mechanic_logout') }}">
+                <span class="material-icons-round">logout</span> Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="mech-main">
+        <div class="mech-topbar">
+            <h2>🔧 {{ session.mechanic_name }}'s Dashboard</h2>
+            <div class="mech-badge">
+                <span class="material-icons-round" style="font-size:.9rem">engineering</span> Mechanic
+            </div>
+        </div>
+
+        <div class="mech-content">
+            <!-- KPIs -->
+            <div class="mech-kpi-grid">
+                <div class="mech-kpi">
+                    <div class="kpi-icon blue"><span class="material-icons-round">directions_car</span></div>
+                    <div>
+                        <div class="kpi-val">{{ active_count }}</div>
+                        <div class="kpi-lbl">Active Jobs</div>
+                    </div>
+                </div>
+                <div class="mech-kpi">
+                    <div class="kpi-icon amber"><span class="material-icons-round">receipt_long</span></div>
+                    <div>
+                        <div class="kpi-val">{{ billing_count }}</div>
+                        <div class="kpi-lbl">Ready for Billing</div>
+                    </div>
+                </div>
+                <div class="mech-kpi">
+                    <div class="kpi-icon green"><span class="material-icons-round">task_alt</span></div>
+                    <div>
+                        <div class="kpi-val">{{ completed_count }}</div>
+                        <div class="kpi-lbl">Completed</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JOBS -->
+            <div class="mech-section-header">
+                <h3>
+                    <span class="material-icons-round" style="color:#64748B">list_alt</span>
+                    Assigned Vehicles
+                    <span class="count-chip">{{ jobs|length }}</span>
+                </h3>
+            </div>
+
+            {% if jobs %}
+            <div class="mech-jobs">
+                {% for job in jobs %}
+                {% set ws = job.work_status or '' %}
+                <div class="mech-job-card
+                    {% if ws == 'Ready for Billing' %}ready-billing
+                    {% elif ws == 'In Progress' %}in-progress
+                    {% elif job.status == 'Completed' %}completed{% endif %}">
+
+                    <div>
+                        <div class="job-ticket">🎫 {{ job.ticket_id }}</div>
+                        <div class="job-vehicle-name">{{ job.vehicle_name }}</div>
+
+                        <!-- Work status badge -->
+                        <div style="margin: 6px 0">
+                            {% if ws == 'Ready for Billing' %}
+                            <span class="work-status-badge ws-billing">⚡ Ready for Billing</span>
+                            {% elif ws == 'In Progress' %}
+                            <span class="work-status-badge ws-progress">🔧 In Progress</span>
+                            {% elif job.status == 'Completed' %}
+                            <span class="work-status-badge ws-completed">✅ Completed</span>
+                            {% else %}
+                            <span class="work-status-badge ws-accepted">⏳ Pending Start</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="job-meta-row">
+                            <div class="job-meta-item">
+                                <span class="material-icons-round">person</span>
+                                {{ job.customer_name }}
+                            </div>
+                            <div class="job-meta-item">
+                                <span class="material-icons-round">directions_car</span>
+                                {{ job.vehicle_type }} · {{ job.vehicle_number }}
+                            </div>
+                            <div class="job-meta-item">
+                                <span class="material-icons-round">calendar_today</span>
+                                {{ job.preferred_date }}
+                            </div>
+                            {% if job.model %}
+                            <div class="job-meta-item">
+                                <span class="material-icons-round">info</span>
+                                {{ job.model }} ({{ job.model_year }})
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="job-problem">
+                            <strong
+                                style="color:#64748B;font-size:.75rem;text-transform:uppercase;letter-spacing:.05em">Problem
+                                Description</strong><br>
+                            {{ job.problem }}
+                        </div>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="job-actions">
+                        {% set next_ws = work_status_flow.get(ws) %}
+                        {% set btn_label = work_status_label.get(ws) %}
+                        {% if btn_label and job.status not in ['Completed', 'Payment Pending'] %}
+                        <form method="POST" action="{{ url_for('mechanic.update_work_status', booking_id=job.id) }}"
+                            onsubmit="return confirm('Update job status for {{ job.ticket_id }}?')">
+                            <button type="submit"
+                                class="ws-btn {% if next_ws == 'In Progress' %}ws-btn-start{% else %}ws-btn-billing{% endif %}">
+                                <span class="material-icons-round" style="font-size:1rem">
+                                    {{ 'play_arrow' if next_ws == 'In Progress' else 'check_circle' }}
+                                </span>
+                                {{ btn_label }}
+                            </button>
+                        </form>
+                        {% elif ws == 'Ready for Billing' %}
+                        <div class="ready-chip">
+                            <span class="material-icons-round" style="font-size:.95rem">hourglass_top</span>
+                            Awaiting Bill
+                        </div>
+                        {% elif job.status == 'Completed' %}
+                        <div class="ready-chip"
+                            style="background:rgba(16,185,129,.1);color:#34D399;border-color:rgba(16,185,129,.4)">
+                            <span class="material-icons-round" style="font-size:.95rem">task_alt</span>
+                            Done
+                        </div>
+                        {% elif job.status == 'Payment Pending' %}
+                        <div class="ready-chip">
+                            <span class="material-icons-round" style="font-size:.95rem">payments</span>
+                            Billing Sent
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            {% else %}
+            <div class="mech-empty">
+                <span class="material-icons-round">engineering</span>
+                <p>No jobs assigned to you yet. Check back later!</p>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}
