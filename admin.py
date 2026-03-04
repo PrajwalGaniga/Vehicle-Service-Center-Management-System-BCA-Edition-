@@ -10,22 +10,24 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
 ADMIN_USERNAME = "Admin"
 ADMIN_PASSWORD = "12345"
 
-# ── Updated status flow
+# ── Updated status flow (includes "Paid (Verifying)" → "Completed")
 STATUS_FLOW = {
-    "Pending":         ["Rejected"],   # Accept is now done via mechanic assignment modal
-    "Accepted":        ["In Progress", "Rejected"],
-    "In Progress":     ["Payment Pending", "Rejected"],
-    "Payment Pending": ["Completed"],
-    "Completed":       [],
-    "Rejected":        [],
+    "Pending":          ["Rejected"],   # Accept is done via mechanic assignment modal
+    "Accepted":         ["In Progress", "Rejected"],
+    "In Progress":      ["Payment Pending", "Rejected"],
+    "Payment Pending":  ["Completed"],
+    "Paid (Verifying)": ["Completed"],
+    "Completed":        [],
+    "Rejected":         [],
 }
 
 STATUS_MESSAGES = {
-    "Accepted":        "Your service request ({tid}) has been accepted! We'll start working on your vehicle soon.",
-    "Rejected":        "We're sorry, your service request ({tid}) has been rejected. Please contact us for more details.",
-    "In Progress":     "Great news! Your vehicle ({tid}) is now being serviced by our technicians.",
-    "Payment Pending": "Your vehicle service ({tid}) is complete! Please proceed to payment via your dashboard.",
-    "Completed":       "Your service ({tid}) is fully completed. Thank you for choosing AutoFix Pro! 🚗",
+    "Accepted":         "Your service request ({tid}) has been accepted! We'll start working on your vehicle soon.",
+    "Rejected":         "We're sorry, your service request ({tid}) has been rejected. Please contact us for more details.",
+    "In Progress":      "Great news! Your vehicle ({tid}) is now being serviced by our technicians.",
+    "Payment Pending":  "Your vehicle service ({tid}) is complete! Please proceed to payment via your dashboard.",
+    "Paid (Verifying)": "Thank you for your payment for {tid}. Admin will verify and mark it as Completed soon.",
+    "Completed":        "Your service ({tid}) is fully completed. Thank you for choosing MotoServ Centre! 🏍️",
 }
 
 
@@ -81,7 +83,7 @@ def admin_login():
         password = request.form.get("password", "").strip()
         if username == ADMIN_USERNAME and password == ADMIN_PASSWORD:
             session["is_admin"] = True
-            flash("Welcome, Admin!", "success")
+            flash("Welcome, Admin! 🏍️", "success")
             return redirect(url_for("admin.admin_dashboard"))
         flash("Invalid admin credentials.", "error")
     return render_template("admin_login.html")
@@ -109,6 +111,7 @@ def admin_dashboard():
     accepted          = conn.execute("SELECT COUNT(*) as c FROM bookings WHERE status='Accepted'").fetchone()["c"]
     in_progress       = conn.execute("SELECT COUNT(*) as c FROM bookings WHERE status='In Progress'").fetchone()["c"]
     payment_pending   = conn.execute("SELECT COUNT(*) as c FROM bookings WHERE status='Payment Pending'").fetchone()["c"]
+    paid_verifying    = conn.execute("SELECT COUNT(*) as c FROM bookings WHERE status='Paid (Verifying)'").fetchone()["c"]
     completed         = conn.execute("SELECT COUNT(*) as c FROM bookings WHERE status='Completed'").fetchone()["c"]
     rejected          = conn.execute("SELECT COUNT(*) as c FROM bookings WHERE status='Rejected'").fetchone()["c"]
     ready_for_billing = conn.execute("SELECT COUNT(*) as c FROM bookings WHERE work_status='Ready for Billing' AND status='In Progress'").fetchone()["c"]
@@ -148,8 +151,8 @@ def admin_dashboard():
         monthly_revenue.append(round(rev, 2))
         monthly_bookings.append(cnt)
 
-    status_labels = ["Pending","Accepted","In Progress","Payment Pending","Completed","Rejected"]
-    status_data   = [pending_tickets, accepted, in_progress, payment_pending, completed, rejected]
+    status_labels = ["Pending","Accepted","In Progress","Payment Pending","Paid (Verifying)","Completed","Rejected"]
+    status_data   = [pending_tickets, accepted, in_progress, payment_pending, paid_verifying, completed, rejected]
     vtype_rows    = conn.execute("SELECT vehicle_type, COUNT(*) as c FROM bookings GROUP BY vehicle_type ORDER BY c DESC").fetchall()
     vtype_labels  = [r["vehicle_type"] for r in vtype_rows]
     vtype_data    = [r["c"] for r in vtype_rows]
@@ -178,7 +181,8 @@ def admin_dashboard():
         total_customers=total_customers, total_bookings=total_bookings,
         total_mechanics=total_mechanics,
         pending_tickets=pending_tickets, in_progress=in_progress,
-        payment_pending=payment_pending, ready_for_billing=ready_for_billing,
+        payment_pending=payment_pending, paid_verifying=paid_verifying,
+        ready_for_billing=ready_for_billing,
         completed=completed, rejected=rejected,
         total_revenue=total_revenue, avg_bill=avg_bill,
         today_bookings=today_bookings, booking_change=booking_change,

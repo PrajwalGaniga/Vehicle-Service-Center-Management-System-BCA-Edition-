@@ -33,7 +33,8 @@ def generate_ticket_id():
     conn = get_db()
     row = conn.execute("SELECT COUNT(*) as cnt FROM bookings").fetchone()
     conn.close()
-    return f"TICK{1001 + row['cnt']}"
+    num = 1001 + row["cnt"]
+    return f"MOTO-{num}"
 
 
 def add_notification(conn, customer_id, message):
@@ -231,7 +232,7 @@ def pay_now(booking_id):
             return render_template("pay_now.html", booking=booking, bill=bill)
         updated_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         conn.execute(
-            "UPDATE bookings SET payment_method=?, updated_at=? WHERE id=?",
+            "UPDATE bookings SET payment_method=?, status='Paid (Verifying)', updated_at=? WHERE id=?",
             (method, updated_at, booking_id)
         )
         # Notify customer confirmation

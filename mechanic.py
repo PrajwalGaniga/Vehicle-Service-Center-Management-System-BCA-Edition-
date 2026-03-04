@@ -8,16 +8,16 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "database.db")
 
 # Mechanic work status flow
 WORK_STATUS_FLOW = {
-    "":                 "In Progress",
-    "Accepted":         "In Progress",
-    "In Progress":      "Ready for Billing",
+    "":                  "In Progress",
+    "Accepted":          "In Progress",
+    "In Progress":       "Ready for Billing",
     "Ready for Billing": None,   # terminal state for mechanic
 }
 
 WORK_STATUS_LABEL = {
-    "":                 "Start Work",
-    "Accepted":         "Start Work",
-    "In Progress":      "Mark Ready for Billing",
+    "":                  "Start Work",
+    "Accepted":          "Start Work",
+    "In Progress":       "Mark Ready for Billing",
     "Ready for Billing": None,
 }
 
@@ -58,7 +58,7 @@ def mechanic_login():
         if mech:
             session["mechanic_id"]   = mech["id"]
             session["mechanic_name"] = mech["name"]
-            flash(f"Welcome, {mech['name']}!", "success")
+            flash(f"Welcome, {mech['name']}! 🔧", "success")
             return redirect(url_for("mechanic.mechanic_dashboard"))
         flash("No active mechanic found with that phone number.", "error")
     return render_template("mechanic_login.html")
@@ -84,7 +84,7 @@ def mechanic_dashboard():
         FROM bookings b
         JOIN customers c ON b.customer_id = c.id
         WHERE b.mechanic_id = ?
-          AND b.status IN ('Accepted', 'In Progress', 'Payment Pending', 'Completed')
+          AND b.status IN ('Accepted', 'In Progress', 'Payment Pending', 'Paid (Verifying)', 'Completed')
         ORDER BY b.updated_at DESC, b.created_at DESC
     """, (mid,)).fetchall()
 
@@ -143,7 +143,6 @@ def update_work_status(booking_id):
     # If ready for billing, insert a notification for admin awareness via customer channel
     if next_ws == "Ready for Billing":
         mech_name = session.get("mechanic_name", "Mechanic")
-        # Notify the customer that work is complete and payment will be requested soon
         conn.execute(
             "INSERT INTO notifications (customer_id, message, is_read, created_at) VALUES (?,?,0,?)",
             (
